@@ -1,0 +1,184 @@
+/* ======================== */
+/*  FitFlow Design Tokens   */
+/* ======================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
+  --transition-slow: 0.4s ease;
+  --sidebar-width: 240px;
+  --topbar-height: 56px;
+}
+
+/* ─── Light Theme ─── */
+[data-theme="light"] {
+  --bg-primary: #F2F0EF;
+  --bg-secondary: #e9e7e5;
+  --bg-card: #ffffff;
+  --bg-sidebar: #EAE8E6;
+  --bg-topbar: rgba(242, 240, 239, 0.85);
+  --bg-input: #e9e7e5;
+  --bg-hover: rgba(0, 0, 0, 0.04);
+  --bg-active: rgba(0, 0, 0, 0.06);
+  --bg-modal-overlay: rgba(0, 0, 0, 0.3);
+  --bg-badge: #e2e0de;
+
+  --text-primary: #1d1d1f;
+  --text-secondary: #6e6e73;
+  --text-tertiary: #aeaeb2;
+  --text-inverse: #ffffff;
+
+  --icon-color: #1d1d1f;
+
+  --border-color: rgba(0, 0, 0, 0.08);
+  --border-color-strong: rgba(0, 0, 0, 0.12);
+
+  --accent: #5e5ce6;
+  --accent-hover: #4b49b6;
+  --accent-soft: rgba(94, 92, 230, 0.1);
+  --accent-text: #5e5ce6;
+
+  --success: #30d158;
+  --success-soft: rgba(48, 209, 88, 0.12);
+  --warning: #ff9f0a;
+  --warning-soft: rgba(255, 159, 10, 0.12);
+  --danger: #ff453a;
+  --danger-soft: rgba(255, 69, 58, 0.12);
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.08);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+
+  --scrollbar-thumb: rgba(0, 0, 0, 0.15);
+  --scrollbar-track: transparent;
+
+  /* Panel pastel backgrounds */
+  --panel-bg: rgba(210, 200, 230, 0.12);
+  --panel-border: rgba(180, 170, 210, 0.25);
+  --panel-glow: rgba(200, 190, 220, 0.08);
+}
+
+/* ─── Dark Theme ─── */
+[data-theme="dark"] {
+  --bg-primary: #1c1c1e;
+  --bg-secondary: #2c2c2e;
+  --bg-card: #2c2c2e;
+  --bg-sidebar: #1c1c1e;
+  --bg-topbar: rgba(28, 28, 30, 0.85);
+  --bg-input: #3a3a3c;
+  --bg-hover: rgba(255, 255, 255, 0.06);
+  --bg-active: rgba(255, 255, 255, 0.08);
+  --bg-modal-overlay: rgba(0, 0, 0, 0.55);
+  --bg-badge: #3a3a3c;
+
+  --text-primary: #f5f5f7;
+  --text-secondary: #a1a1a6;
+  --text-tertiary: #636366;
+  --text-inverse: #1d1d1f;
+
+  --icon-color: #f5f5f7;
+
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-color-strong: rgba(255, 255, 255, 0.12);
+
+  --accent: #7d7aff;
+  --accent-hover: #6a67e6;
+  --accent-soft: rgba(125, 122, 255, 0.15);
+  --accent-text: #7d7aff;
+
+  --success: #30d158;
+  --success-soft: rgba(48, 209, 88, 0.15);
+  --warning: #ff9f0a;
+  --warning-soft: rgba(255, 159, 10, 0.15);
+  --danger: #ff453a;
+  --danger-soft: rgba(255, 69, 58, 0.15);
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.35);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.1);
+
+  --scrollbar-thumb: rgba(255, 255, 255, 0.15);
+  --scrollbar-track: transparent;
+
+  /* Panel pastel backgrounds */
+  --panel-bg: rgba(125, 122, 255, 0.06);
+  --panel-border: rgba(125, 122, 255, 0.15);
+  --panel-glow: rgba(125, 122, 255, 0.04);
+}
+
+/* ─── Global Resets ─── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color var(--transition-normal), color var(--transition-normal);
+  line-height: 1.5;
+  overflow: hidden;
+  height: 100vh;
+}
+
+#root {
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 3px;
+}
+
+/* Focus styles */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: var(--font-family);
+}
+
+input,
+select,
+textarea {
+  font-family: var(--font-family);
+}
+
+a {
+  text-decoration: none;
+  color: var(--accent-text);
+}

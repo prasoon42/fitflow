@@ -1,0 +1,140 @@
+.outfit-builder {
+    width: 100%;
+}
+
+.outfit-builder__sections {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 28px;
+}
+
+@media (max-width: 800px) {
+    .outfit-builder__sections {
+        grid-template-columns: 1fr;
+    }
+}
+
+.outfit-section {
+    padding: 20px;
+}
+
+.outfit-section__title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.outfit-section__items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.outfit-item-option {
+    width: 72px;
+    height: 72px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid var(--border-color);
+    transition: all var(--transition-fast);
+    position: relative;
+}
+
+.outfit-item-option:hover {
+    border-color: var(--accent);
+    transform: scale(1.05);
+}
+
+.outfit-item-option--selected {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.outfit-item-option--selected::after {
+    content: '✓';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(94, 92, 230, 0.3);
+    color: white;
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+.outfit-item-option__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.outfit-item-option__name {
+    display: none;
+}
+
+/* Preview area */
+.outfit-preview {
+    padding: 24px;
+    margin-bottom: 20px;
+}
+
+.outfit-preview__title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.outfit-preview__items {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    min-height: 100px;
+    align-items: center;
+}
+
+.outfit-preview__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.outfit-preview__item-img {
+    width: 100px;
+    height: 100px;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+    border: 1px solid var(--border-color);
+}
+
+.outfit-preview__item-label {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.outfit-preview__empty {
+    color: var(--text-tertiary);
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
+.outfit-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.outfit-name-input {
+    margin-bottom: 16px;
+}

@@ -1,0 +1,54 @@
+.favourites-panel {
+    width: 100%;
+}
+
+.outfit-fav-card {
+    padding: 20px;
+}
+
+.outfit-fav-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.outfit-fav-card__name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.outfit-fav-card__items {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.outfit-fav-card__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.outfit-fav-card__item-img {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+    border: 1px solid var(--border-color);
+}
+
+.outfit-fav-card__item-label {
+    font-size: 0.65rem;
+    color: var(--text-tertiary);
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.favourites-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+}

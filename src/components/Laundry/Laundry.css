@@ -1,0 +1,36 @@
+.laundry-panel {
+    width: 100%;
+}
+
+.laundry-card__actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.laundry-stats {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.laundry-stat {
+    padding: 16px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.laundry-stat__value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.laundry-stat__label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}

@@ -40,10 +40,10 @@
   --border-color: rgba(0, 0, 0, 0.08);
   --border-color-strong: rgba(0, 0, 0, 0.12);
 
-  --accent: #5e5ce6;
-  --accent-hover: #4b49b6;
-  --accent-soft: rgba(94, 92, 230, 0.1);
-  --accent-text: #5e5ce6;
+  --accent: #C7D3BF;
+  --accent-hover: #b3c2a8;
+  --accent-soft: rgba(199, 211, 191, 0.18);
+  --accent-text: #6b7e60;
 
   --success: #30d158;
   --success-soft: rgba(48, 209, 88, 0.12);
@@ -61,23 +61,23 @@
   --scrollbar-track: transparent;
 
   /* Panel pastel backgrounds */
-  --panel-bg: rgba(210, 200, 230, 0.12);
-  --panel-border: rgba(180, 170, 210, 0.25);
-  --panel-glow: rgba(200, 190, 220, 0.08);
+  --panel-bg: rgba(199, 211, 191, 0.12);
+  --panel-border: rgba(199, 211, 191, 0.25);
+  --panel-glow: rgba(199, 211, 191, 0.08);
 }
 
 /* ─── Dark Theme ─── */
 [data-theme="dark"] {
-  --bg-primary: #1c1c1e;
-  --bg-secondary: #2c2c2e;
-  --bg-card: #2c2c2e;
-  --bg-sidebar: #1c1c1e;
-  --bg-topbar: rgba(28, 28, 30, 0.85);
-  --bg-input: #3a3a3c;
+  --bg-primary: #1e212b;
+  --bg-secondary: #282b36;
+  --bg-card: #282b36;
+  --bg-sidebar: #1e212b;
+  --bg-topbar: rgba(30, 33, 43, 0.85);
+  --bg-input: #323540;
   --bg-hover: rgba(255, 255, 255, 0.06);
   --bg-active: rgba(255, 255, 255, 0.08);
   --bg-modal-overlay: rgba(0, 0, 0, 0.55);
-  --bg-badge: #3a3a3c;
+  --bg-badge: #323540;
 
   --text-primary: #f5f5f7;
   --text-secondary: #a1a1a6;
@@ -89,10 +89,10 @@
   --border-color: rgba(255, 255, 255, 0.08);
   --border-color-strong: rgba(255, 255, 255, 0.12);
 
-  --accent: #7d7aff;
-  --accent-hover: #6a67e6;
-  --accent-soft: rgba(125, 122, 255, 0.15);
-  --accent-text: #7d7aff;
+  --accent: #284b63;
+  --accent-hover: #1f3c50;
+  --accent-soft: rgba(40, 75, 99, 0.2);
+  --accent-text: #3a7ca5;
 
   --success: #30d158;
   --success-soft: rgba(48, 209, 88, 0.15);
@@ -110,9 +110,9 @@
   --scrollbar-track: transparent;
 
   /* Panel pastel backgrounds */
-  --panel-bg: rgba(125, 122, 255, 0.06);
-  --panel-border: rgba(125, 122, 255, 0.15);
-  --panel-glow: rgba(125, 122, 255, 0.04);
+  --panel-bg: rgba(40, 75, 99, 0.08);
+  --panel-border: rgba(40, 75, 99, 0.18);
+  --panel-glow: rgba(40, 75, 99, 0.05);
 }
 
 /* ─── Global Resets ─── */

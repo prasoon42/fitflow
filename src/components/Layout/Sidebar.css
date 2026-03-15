@@ -48,15 +48,15 @@
 }
 
 .sidebar__item--active {
-    background: var(--accent-soft);
-    color: var(--accent-text);
+    background: rgba(169, 153, 133, 0.15);
+    color: #a99985;
     font-weight: 600;
     opacity: 1;
 }
 
 .sidebar__item--active:hover {
-    background: var(--accent-soft);
-    color: var(--accent-text);
+    background: rgba(169, 153, 133, 0.2);
+    color: #a99985;
 }
 
 .sidebar__icon {

@@ -164,9 +164,15 @@ function Wardrobe() {
                                     className="clothing-card__image"
                                     loading="lazy"
                                 />
-                                <span className={`tag clothing-card__status ${item.status === 'available' ? 'tag--available' : 'tag--laundry'}`}>
-                                    {item.status === 'available' ? 'Available' : 'In Laundry'}
-                                </span>
+                                {statusFilter === 'all' && (
+                                    <span className={`clothing-card__status-icon ${item.status === 'available' ? 'status-icon--available' : 'status-icon--laundry'}`} title={item.status === 'available' ? 'Available' : 'In Laundry'}>
+                                        {item.status === 'available' ? (
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                                        ) : (
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="13" r="8" /><circle cx="12" cy="13" r="3" /><path d="M5 3h14" /></svg>
+                                        )}
+                                    </span>
+                                )}
                             </div>
                             <div className="clothing-card__body">
                                 <div className="clothing-card__name">{item.name}</div>

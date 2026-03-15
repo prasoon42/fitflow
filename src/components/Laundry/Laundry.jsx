@@ -53,7 +53,9 @@ function Laundry() {
                         <div key={item.id} className="card clothing-card">
                             <div className="clothing-card__image-wrap">
                                 <img src={item.image} alt={item.name} className="clothing-card__image" loading="lazy" />
-                                <span className="tag tag--laundry clothing-card__status">In Laundry</span>
+                                <span className="clothing-card__status-icon status-icon--laundry" title="In Laundry">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="13" r="8" /><circle cx="12" cy="13" r="3" /><path d="M5 3h14" /></svg>
+                                </span>
                             </div>
                             <div className="clothing-card__body">
                                 <div className="clothing-card__name">{item.name}</div>
@@ -62,8 +64,9 @@ function Laundry() {
                                     <button
                                         className="btn btn--sm btn--success"
                                         onClick={() => returnFromLaundry(item.id)}
+                                        title="Mark as Washed"
                                     >
-                                        <CheckIcon /> Mark as Washed
+                                        <CheckIcon />
                                     </button>
                                     <button
                                         className="btn btn--sm btn--secondary"

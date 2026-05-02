@@ -1,4 +1,4 @@
-// Mock wardrobe items
+// Mock wardrobe items (prices in ₹)
 export const initialWardrobeItems = [
   {
     id: 1,
@@ -98,63 +98,125 @@ export const initialWardrobeItems = [
   },
 ];
 
-// Mock shopping products
+// Mock shopping products — Indian e-commerce (prices in ₹)
+// Buy links are generated dynamically in ShoppingSuggestions component with per-item budget sliders
 export const mockShoppingProducts = [
+  // --- Upperwear ---
   {
     id: 101,
     name: 'Relaxed Fit Linen Shirt',
-    price: 49.99,
+    price: 1299,
     image: 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=300&h=300&fit=crop',
     category: 'Upperwear',
   },
   {
+    id: 105,
+    name: 'Cashmere Blend Sweater',
+    price: 2499,
+    image: 'https://images.unsplash.com/photo-1434389677669-e08b4cda3a95?w=300&h=300&fit=crop',
+    category: 'Upperwear',
+  },
+  // --- Lowerwear ---
+  {
     id: 102,
     name: 'Slim Tailored Trousers',
-    price: 79.99,
+    price: 1999,
     image: 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=300&h=300&fit=crop',
     category: 'Lowerwear',
   },
-  {
-    id: 103,
-    name: 'Minimalist Leather Belt',
-    price: 34.99,
-    image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300&h=300&fit=crop',
-    category: 'Accessories',
-  },
+  // --- Shoes ---
   {
     id: 104,
     name: 'Suede Desert Boots',
-    price: 119.99,
+    price: 3499,
     image: 'https://images.unsplash.com/photo-1608256246200-53e635b5b65f?w=300&h=300&fit=crop',
     category: 'Shoes',
   },
   {
-    id: 105,
-    name: 'Cashmere Blend Sweater',
-    price: 89.99,
-    image: 'https://images.unsplash.com/photo-1434389677669-e08b4cda3a95?w=300&h=300&fit=crop',
-    category: 'Upperwear',
+    id: 108,
+    name: 'Running Sports Sneakers',
+    price: 2999,
+    image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&h=300&fit=crop',
+    category: 'Shoes',
   },
+  // --- Outerwear ---
   {
     id: 106,
-    name: 'Waterproof Parka',
-    price: 159.99,
+    name: 'Waterproof Parka Jacket',
+    price: 4999,
     image: 'https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=300&h=300&fit=crop',
     category: 'Outerwear',
+  },
+  // --- Accessories ---
+  {
+    id: 103,
+    name: 'Minimalist Leather Belt',
+    price: 799,
+    image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300&h=300&fit=crop',
+    category: 'Accessories',
   },
   {
     id: 107,
     name: 'Canvas Tote Bag',
-    price: 29.99,
+    price: 699,
     image: 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=300&h=300&fit=crop',
     category: 'Accessories',
   },
   {
-    id: 108,
-    name: 'Running Sneakers',
-    price: 99.99,
-    image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&h=300&fit=crop',
-    category: 'Shoes',
+    id: 109,
+    name: 'Aviator Sunglasses',
+    price: 1299,
+    image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=300&h=300&fit=crop',
+    category: 'Accessories',
+  },
+  {
+    id: 110,
+    name: 'Analog Wrist Watch',
+    price: 2999,
+    image: 'https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=300&h=300&fit=crop',
+    category: 'Accessories',
+  },
+  {
+    id: 111,
+    name: 'Leather Bifold Wallet',
+    price: 899,
+    image: 'https://images.unsplash.com/photo-1627123424574-724758594e93?w=300&h=300&fit=crop',
+    category: 'Accessories',
+  },
+  {
+    id: 112,
+    name: 'Snapback Cap',
+    price: 499,
+    image: 'https://images.unsplash.com/photo-1588850561407-ed78c334e67a?w=300&h=300&fit=crop',
+    category: 'Accessories',
+  },
+  {
+    id: 113,
+    name: 'Wool Knit Scarf',
+    price: 999,
+    image: 'https://images.unsplash.com/photo-1520903920243-00d872a2d1c9?w=300&h=300&fit=crop',
+    category: 'Accessories',
+  },
+  {
+    id: 114,
+    name: 'Silver Cufflinks Set',
+    price: 1499,
+    image: 'https://images.unsplash.com/photo-1590548784585-643d2b9f2925?w=300&h=300&fit=crop',
+    category: 'Accessories',
+  },
+  {
+    id: 115,
+    name: 'Silk Printed Tie',
+    price: 799,
+    image: 'https://images.unsplash.com/photo-1598971861713-54ad16a7e72e?w=300&h=300&fit=crop',
+    category: 'Accessories',
+  },
+  {
+    id: 116,
+    name: 'Travel Laptop Backpack',
+    price: 1799,
+    image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300&h=300&fit=crop',
+    category: 'Accessories',
   },
 ];
 

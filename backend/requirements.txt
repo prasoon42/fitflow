@@ -1,0 +1,15 @@
+ultralytics
+opencv-python
+numpy
+fastapi
+uvicorn
+python-multipart
+pymongo
+cloudinary
+pyjwt
+passlib[bcrypt]
+python-dotenv
+requests
+Pillow
+# Optional legacy path: POST /try-on/replicate
+# replicate

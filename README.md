@@ -1,71 +1,242 @@
-# FitFlow
+---
 
-Virtual wardrobe: **Vite + React** in `frontend/`, **FastAPI** in `backend/`. This repo uses **npm workspaces** so you can install and run the UI from the root.
+# 👔 FitFlow — AI Virtual Wardrobe Stylist
 
-## Run the app
+FitFlow is an **AI-powered virtual wardrobe assistant** that digitizes your clothing collection and generates intelligent outfit recommendations based on **fashion rules, color theory, and occasion context**.
 
-**1. Install (once, from repo root)**
+It transforms raw clothing images into structured fashion data and uses a scoring engine to build optimized outfits—reducing decision fatigue and improving daily styling.
 
-```bash
-npm install
+---
+
+## 🚀 Features
+
+* 📸 **Smart Clothing Detection**
+
+  * Upload an image → Automatically detects clothing type using YOLOv8
+
+* 🎨 **Color Extraction**
+
+  * Extracts dominant color using OpenCV + KMeans
+
+* 🧥 **Digital Wardrobe**
+
+  * Stores all clothing items with metadata (type, color, image)
+
+* 👗 **AI Outfit Recommendations**
+
+  * Generates outfits based on:
+
+    * Occasion (Office, Casual, Party)
+    * Color harmony
+    * Style compatibility
+
+* 🛍️ **Shopping Suggestions**
+
+  * Detects missing wardrobe items
+  * Fetches real-time product suggestions using SerpApi
+
+* 🧼 **Background Removal**
+
+  * Clean clothing cutouts via Remove.bg API
+
+---
+
+## 🏗️ Architecture Overview
+
+```
+Frontend (React + Vite)
+        ↓
+Backend API (FastAPI)
+        ↓
+ML Layer (YOLOv8 + OpenCV)
+        ↓
+Storage (MongoDB + Cloudinary)
+        ↓
+External APIs (Remove.bg + SerpApi)
 ```
 
-**2. API (Terminal A)** — from `backend/`, with a virtualenv if you use one:
+---
+
+## 🧠 Tech Stack
+
+### Frontend
+
+* React.js
+* Vite
+* Vanilla CSS
+
+### Backend
+
+* Python
+* FastAPI
+
+### Machine Learning
+
+* YOLOv8 (Object Detection)
+* OpenCV (Image Processing)
+* KMeans Clustering (Color Extraction)
+
+### Database & Storage
+
+* MongoDB Atlas
+* Cloudinary
+
+### Integrations
+
+* Remove.bg API
+* SerpApi (Google Shopping)
+
+---
+
+## 🔄 How It Works
+
+### 1. Authentication
+
+* Secure login using JWT tokens
+
+### 2. Upload Clothing Item
+
+* Image is uploaded
+* Background removed (Remove.bg)
+* YOLO detects clothing type
+* OpenCV extracts dominant color
+* Image stored in Cloudinary
+* Metadata saved in MongoDB
+
+### 3. Outfit Recommendation
+
+* User selects occasion
+* Backend generates combinations
+* Applies scoring rules
+* Returns best outfit
+
+### 4. Shopping Suggestions
+
+* Missing items detected
+* SerpApi fetches real products
+
+---
+
+## 🧮 Scoring Engine (Core Logic)
+
+Outfits are ranked using a weighted scoring system:
+
+```
+Score = 
+  w1 * color_match +
+  w2 * occasion_fit +
+  w3 * style_alignment +
+  w4 * user_preference
+```
+
+### Factors Considered:
+
+* Color harmony (complementary / analogous)
+* Occasion compatibility
+* Style consistency (formal vs casual)
+* Clothing hierarchy
+
+---
+
+## 📦 Project Structure
+
+```
+fitflow/
+│
+├── frontend/          # React App
+├── backend/
+│   ├── main.py        # FastAPI entry point
+│   ├── routes/        # API endpoints
+│   ├── models/        # ML models
+│   ├── services/      # Business logic
+│   └── recommender.py # Outfit scoring engine
+│
+├── database/          # MongoDB schemas
+├── utils/             # Image processing helpers
+└── README.md
+```
+
+---
+
+## ⚙️ Setup Instructions
+
+### 1. Clone Repository
+
+```bash
+git clone https://github.com/your-username/fitflow.git
+cd fitflow
+```
+
+### 2. Backend Setup
 
 ```bash
 cd backend
 pip install -r requirements.txt
-# copy backend/.env.example → backend/.env and set MONGODB_URI, JWT_SECRET_KEY, etc.
-uvicorn main:app --reload --host 127.0.0.1 --port 8000
+uvicorn main:app --reload
 ```
 
-**3. Frontend (Terminal B)** — from repo root:
+### 3. Frontend Setup
 
 ```bash
+cd frontend
+npm install
 npm run dev
 ```
 
-Dev server **prefers port 5174**. If that port is busy, Vite picks **5175**, **5176**, etc. — always open the **`Local:`** URL printed in the terminal (Cursor’s tab may still point at the wrong port until you change it).
+---
 
-**If you want to free 5174 on Windows** (old Vite left running):
+## 🔑 Environment Variables
 
-```powershell
-netstat -ano | findstr :5174
-taskkill /PID <pid_from_last_column> /F
+Create a `.env` file in backend:
+
+```
+MONGO_URI=your_mongodb_uri
+CLOUDINARY_URL=your_cloudinary_url
+REMOVE_BG_API_KEY=your_key
+SERP_API_KEY=your_key
+JWT_SECRET=your_secret
 ```
 
-Then run `npm run dev` again.
+---
 
-Previewing a production build uses **`npm run preview`** → usually **`http://localhost:4173/`**.
+## 📈 Future Improvements
 
-Login/register calls the API at `VITE_API_BASE_URL` / `http://127.0.0.1:8000`; keep the backend running or auth will fail.
+* 🔍 Personalized recommendations (user preference learning)
+* 🧠 Deep learning-based outfit ranking
+* 🌦️ Weather-based outfit suggestions
+* ⚡ Redis caching for faster recommendations
+* 📱 Mobile app version
 
-### It looks like an “old” version of the app
+---
 
-Your code lives under `frontend/src/`. Nothing is “lost” unless files were deleted on disk. If the UI does not match your latest edits:
+## 🧪 Challenges Faced
 
-1. **Use the same port the terminal prints** (this project defaults to **5174** for Cursor’s browser). If the tab and terminal ports differ, the page can be blank.
-2. **Use the dev server, not a static folder:** run `npm run dev` from the repo root. Do not open `dist/index.html` in the file system or use “Live Server” on an old `dist` folder.
-3. **Hard refresh** the page: `Ctrl+Shift+R` (Windows) or disable cache in DevTools and reload.
-4. **Stop duplicate Vite processes** (only one `npm run dev` at a time). If Vite moves to another port, update the browser URL to match **`Local:`** in the terminal.
-5. **Clear Vite’s cache** if things are still wrong: delete the `.vite` folder in the project (and `frontend/node_modules/.vite` if present), then run `npm run dev` again.
+* Accurate clothing detection on real-world messy images
+* Extracting consistent colors under different lighting
+* Designing a scalable outfit scoring system
+* Handling asynchronous image processing efficiently
 
-**Alternative:** `cd frontend && npm install && npm run dev` if you prefer not to use the root workspace.
+---
 
-### API URL (frontend)
+## 🤝 Contributing
 
-All requests use `frontend/src/config.js`. Override with **`frontend/.env`**:
+Contributions are welcome!
 
-```bash
-# frontend/.env
-VITE_API_BASE_URL=http://127.0.0.1:8000
-```
+1. Fork the repo
+2. Create your feature branch
+3. Commit your changes
+4. Open a pull request
 
-Copy from `frontend/.env.example`. Restart Vite after changing env vars.
+---
 
-## Scripts (root)
+## 📄 License
 
-| Command        | Action              |
-|----------------|---------------------|
-| `npm run dev`  | Vite dev server     |
-| `npm run build`| Production build → `frontend/dist/` |
+This project is licensed under the MIT License.
+
+---
+
+## ⭐ Final Note
+
+FitFlow is not just a wardrobe app—it is a **fusion of computer vision, recommendation systems, and modern web engineering** aimed at redefining how users interact with their clothing.
+
+---

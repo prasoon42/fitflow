@@ -2,15 +2,16 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { styleOptions, colorOptions } from '../../data/mockData';
 import { useAuth } from '../../context/AuthContext';
 import { useWardrobe } from '../../context/WardrobeContext';
-import { profileStorageKey, loadProfileFromStorage } from '../../utils/profileStorage';
+import axios from 'axios';
 import './Profile.css';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 function Profile() {
     const { user, updateUserName, updateUserAvatar } = useAuth();
     const { wardrobeItems } = useWardrobe();
     const displayName = user?.name || 'User';
     const fileInputRef = useRef(null);
-    const storageKey = useMemo(() => profileStorageKey(user?.email), [user?.email]);
     const [profile, setProfile] = useState({
         gender: '',
         age: '',
@@ -23,23 +24,29 @@ function Profile() {
     const favoriteColorsSummary = profile.colors.length > 0 ? profile.colors.slice(0, 3).join(', ') : 'Not set';
 
     useEffect(() => {
-        const parsed = loadProfileFromStorage(user?.email);
-        if (!parsed) {
-            setProfile({
-                gender: '',
-                age: '',
-                styles: [],
-                colors: [],
-            });
-            return;
-        }
-        setProfile({
-            gender: parsed?.gender || '',
-            age: parsed?.age ?? '',
-            styles: Array.isArray(parsed?.styles) ? parsed.styles : [],
-            colors: Array.isArray(parsed?.colors) ? parsed.colors : [],
-        });
-    }, [storageKey, user?.email]);
+        const fetchProfile = async () => {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+            try {
+                const response = await axios.get(`${API_URL}/profile`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const parsed = response.data;
+                setProfile({
+                    gender: parsed?.gender || '',
+                    age: parsed?.age ?? '',
+                    styles: Array.isArray(parsed?.fashion_styles) ? parsed.fashion_styles : [],
+                    colors: Array.isArray(parsed?.preferred_colors) ? parsed.preferred_colors : [],
+                });
+                if (parsed?.display_name && parsed.display_name !== displayName) {
+                    updateUserName(parsed.display_name);
+                }
+            } catch (error) {
+                console.error("Error fetching profile from backend", error);
+            }
+        };
+        fetchProfile();
+    }, [user?.email]);
 
     useEffect(() => {
         setEditedName(displayName);
@@ -71,20 +78,45 @@ function Profile() {
         }));
     };
 
-    const handleSave = () => {
-        localStorage.setItem(storageKey, JSON.stringify(profile));
-        
-        if (editedName.trim() !== displayName) {
-            updateUserName(editedName);
+    const handleSave = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        try {
+            await axios.put(`${API_URL}/profile`, {
+                gender: profile.gender || null,
+                age: profile.age ? parseInt(profile.age, 10) : null,
+                fashion_styles: profile.styles,
+                preferred_colors: profile.colors,
+                display_name: editedName
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (editedName.trim() !== displayName) {
+                updateUserName(editedName);
+            }
+            
+            setSaved(true);
+            setTimeout(() => setSaved(false), 2000);
+        } catch (error) {
+            console.error("Error saving profile", error);
+            alert("Failed to save profile. Please try again.");
         }
-        
-        setSaved(true);
-        setTimeout(() => setSaved(false), 2000);
     };
 
-    const handleNameSave = () => {
+    const handleNameSave = async () => {
         const ok = updateUserName(editedName);
         if (!ok) return;
+        const token = localStorage.getItem('token');
+        if (token) {
+            try {
+                await axios.put(`${API_URL}/profile`, { display_name: editedName }, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+            } catch (error) {
+                console.error("Error saving name to backend", error);
+            }
+        }
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
     };

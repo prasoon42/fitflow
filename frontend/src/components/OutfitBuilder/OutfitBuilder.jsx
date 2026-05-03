@@ -5,7 +5,6 @@ import { useClothingTransparentUrls } from '../../hooks/useClothingTransparentUr
 import { OutfitCompositeStack } from './OutfitCompositeStack';
 import { fetchWithTimeout } from '../../utils/fetchWithTimeout';
 import { API_BASE } from '../../config';
-import { loadProfileFromStorage } from '../../utils/profileStorage';
 import './OutfitBuilder.css';
 
 const occasionOptions = [
@@ -117,10 +116,29 @@ function OutfitBuilder() {
     const { display: layerDisplayUrls, processing: bgProcessing, removalEnabled, cutoutMeta } =
         useClothingTransparentUrls(layers, token);
 
+    const [profileGender, setProfileGender] = useState('');
+
+    useEffect(() => {
+        const fetchGender = async () => {
+            if (!token) return;
+            try {
+                const response = await fetchWithTimeout(`${API_BASE}/profile`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    setProfileGender(data?.gender || '');
+                }
+            } catch (err) {
+                console.error("Error fetching profile", err);
+            }
+        };
+        fetchGender();
+    }, [token]);
+
     const getProfileGender = useCallback(() => {
-        const parsed = loadProfileFromStorage(user?.email);
-        return (parsed?.gender || '').trim();
-    }, [user?.email]);
+        return profileGender;
+    }, [profileGender]);
 
     useEffect(() => {
         setRankedOptions([]);

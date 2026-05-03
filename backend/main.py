@@ -160,6 +160,15 @@ class RateOutfitRequest(BaseModel):
 class ClothingTransparentRequest(BaseModel):
     image_url: str = Field(..., description="Public or localhost URL the server can GET")
 
+class UserProfileUpdate(BaseModel):
+    display_name: Optional[str] = None
+    age: Optional[int] = None
+    gender: Optional[str] = None
+    fashion_styles: Optional[List[str]] = None
+    preferred_colors: Optional[List[str]] = None
+    fit_preference: Optional[str] = None
+    description: Optional[str] = None
+
 
 @app.post("/register")
 def register(user: UserAuth):
@@ -184,6 +193,41 @@ def login(user: UserAuth):
     
     token = create_access_token({"sub": str(db_user["_id"])})
     return {"token": token, "email": user.email}
+
+@app.get("/profile")
+def get_profile(user_id: str = Depends(get_current_user)):
+    db_user = users_collection.find_one({"_id": ObjectId(user_id)})
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {
+        "email": db_user.get("email"),
+        "display_name": db_user.get("display_name", ""),
+        "age": db_user.get("age", ""),
+        "gender": db_user.get("gender", ""),
+        "fashion_styles": db_user.get("fashion_styles", []),
+        "preferred_colors": db_user.get("preferred_colors", []),
+        "fit_preference": db_user.get("fit_preference", ""),
+        "description": db_user.get("description", "")
+    }
+
+@app.put("/profile")
+def update_profile(profile: UserProfileUpdate, user_id: str = Depends(get_current_user)):
+    update_data = {k: v for k, v in profile.model_dump().items() if v is not None}
+    
+    if not update_data:
+        return {"status": "ok", "message": "No changes provided"}
+        
+    result = users_collection.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": update_data}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    return {"status": "ok", "message": "Profile updated successfully"}
+
 
 @app.get("/wardrobe")
 def get_wardrobe(user_id: str = Depends(get_current_user)):

@@ -11,8 +11,31 @@ node_modules
 dist
 dist-ssr
 *.local
+.vite
 
-# Editor directories and files
+
+# Secrets — copy backend/.env.example to backend/.env locally
+.env
+backend/.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+*.so
+.venv/
+venv/
+ENV/
+
+# Uploaded / generated files (keep folder via .gitkeep)
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# ML weights — copy locally or use Git LFS (do not commit large .pt files)
+backend/ml/*.pt
+
+# Editor
 .vscode/*
 !.vscode/extensions.json
 .idea

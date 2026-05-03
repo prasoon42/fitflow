@@ -1,4 +1,6 @@
+import os
 import re
+import requests
 from urllib.parse import quote_plus
 from typing import Any, Dict, List, Optional, Set, Tuple
 
@@ -261,25 +263,71 @@ def _dedupe_products(products: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return out
 
 
-def get_products(search_query: str, limit: int = 3) -> List[Dict[str, Any]]:
+def get_products(search_query: str, limit: int = 5) -> List[Dict[str, Any]]:
     """
-    One browse link per cleaned query: opens Google Shopping search results.
-    `limit` is kept for API compatibility; we return a single primary link per query.
+    Fetch top products using SerpApi Google Shopping API.
+    Gracefully falls back to direct search link on failure or missing API key.
     """
-    _ = limit
     q = (search_query or "").strip()
     if not q:
         return []
-    display = q if len(q) <= 160 else q[:157] + "…"
-    url = google_shopping_search_url(q)
-    return [
-        {
+        
+    api_key = os.getenv("SERPAPI_API_KEY")
+    if not api_key:
+        display = q if len(q) <= 160 else q[:157] + "…"
+        url = google_shopping_search_url(q)
+        return [{
             "title": display,
             "image": None,
             "link": url,
             "price": "Google Shopping",
-        }
-    ]
+        }]
+
+    params = {
+        "engine": "google_shopping",
+        "q": q,
+        "api_key": api_key,
+        "hl": "en",
+        "gl": "in",
+    }
+    
+    try:
+        response = requests.get("https://serpapi.com/search", params=params, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        
+        results = data.get("shopping_results", [])
+        products = []
+        for res in results[:limit]:
+            products.append({
+                "title": res.get("title"),
+                "image": res.get("thumbnail"),
+                "link": res.get("product_link") or res.get("link") or google_shopping_search_url(q),
+                "price": res.get("price"),
+            })
+            
+        if not products:
+            # Fallback if no shopping results
+            display = q if len(q) <= 160 else q[:157] + "…"
+            url = google_shopping_search_url(q)
+            return [{
+                "title": display,
+                "image": None,
+                "link": url,
+                "price": "Google Shopping",
+            }]
+            
+        return products
+    except Exception as e:
+        print(f"[shopping] SerpApi error for {q}: {e}")
+        display = q if len(q) <= 160 else q[:157] + "…"
+        url = google_shopping_search_url(q)
+        return [{
+            "title": display,
+            "image": None,
+            "link": url,
+            "price": "Google Shopping",
+        }]
 
 
 def test_products() -> List[Dict[str, Any]]:
@@ -415,7 +463,7 @@ def preset_queries_for_outfit_gaps(
 
 def build_shopping_links(
     suggestions: Optional[List[str]],
-    limit: int = 3,
+    limit: int = 5,
     gender: Optional[str] = None,
     preset_queries: Optional[List[str]] = None,
 ) -> List[Dict[str, Any]]:

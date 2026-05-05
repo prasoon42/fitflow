@@ -2,139 +2,62 @@
 
 # 👔 FitFlow — AI Virtual Wardrobe Stylist
 
-FitFlow is an **AI-powered virtual wardrobe assistant** that digitizes your clothing collection and generates intelligent outfit recommendations based on **fashion rules, color theory, and occasion context**.
+FitFlow is a professional-grade **AI-powered personal stylist** and wardrobe management system. It digitizes your clothing collection using Computer Vision and provides intelligent, rule-based outfit recommendations for any occasion.
 
-It transforms raw clothing images into structured fashion data and uses a scoring engine to build optimized outfits—reducing decision fatigue and improving daily styling.
-
----
-
-## 🚀 Features
-
-* 📸 **Smart Clothing Detection**
-
-  * Upload an image → Automatically detects clothing type using YOLOv8
-
-* 🎨 **Color Extraction**
-
-  * Extracts dominant color using OpenCV + KMeans
-
-* 🧥 **Digital Wardrobe**
-
-  * Stores all clothing items with metadata (type, color, image)
-
-* 👗 **AI Outfit Recommendations**
-
-  * Generates outfits based on:
-
-    * Occasion (Office, Casual, Party)
-    * Color harmony
-    * Style compatibility
-
-* 🛍️ **Shopping Suggestions**
-
-  * Detects missing wardrobe items
-  * Fetches real-time product suggestions using SerpApi
-
-* 🧼 **Background Removal**
-
-  * Clean clothing cutouts via Remove.bg API
+By combining **YOLOv8** for object detection and **LLMs (Llama 3)** for fashion reasoning, FitFlow helps users maximize their current wardrobe, track laundry cycles, and fill style gaps with integrated shopping suggestions.
 
 ---
 
-## 🏗️ Architecture Overview
+## 🚀 Key Features
 
-```
-Frontend (React + Vite)
-        ↓
-Backend API (FastAPI)
-        ↓
-ML Layer (YOLOv8 + OpenCV)
-        ↓
-Storage (MongoDB + Cloudinary)
-        ↓
-External APIs (Remove.bg + SerpApi)
-```
+*   📸 **AI Wardrobe Digitization**: 
+    *   Automatic garment detection (Top, Bottom, Shoes, etc.) via **YOLOv8**.
+    *   Precision color extraction using K-Means clustering.
+    *   Automated background removal for a clean "catalog" look.
+*   🧥 **Intelligent Outfit Builder**: 
+    *   **AI Recommendations**: Generates full looks based on 6+ occasions (Formal, Office, Gym, Travel, etc.).
+    *   **Strict Scoring Engine**: A deterministic 100-point logic evaluating Fit, Style, Combination, and Color Harmony.
+    *   **Natural Language Feedback**: Detailed "Why this works" explanations and style improvement tips.
+*   🧼 **Smart Laundry Tracker**: 
+    *   Track "Days since washed" for every item.
+    *   Real-time status updates (Available vs. In Laundry).
+    *   "Return from Laundry" quick-actions directly from the wardrobe.
+*   🛍️ **Integrated Shopping**: 
+    *   Detects missing pieces in a suggested look.
+    *   Provides real-time "Buy Now" links from Google Shopping (via SerpAPI).
+*   ❤️ **Favourites**: Save and name your best looks for instant access.
 
 ---
 
 ## 🧠 Tech Stack
 
-### Frontend
+### **Frontend**
+*   **React.js (Vite)**: High-performance single-page architecture.
+*   **Vanilla CSS**: Custom "Glassmorphism" design system with smooth animations.
+*   **Context API**: Global state management for Wardrobe, Laundry, and Auth.
 
-* React.js
-* Vite
-* Vanilla CSS
+### **Backend & AI**
+*   **FastAPI (Python)**: High-speed asynchronous API orchestrator.
+*   **YOLOv8**: Real-time object detection for clothing categorization.
+*   **Groq (Llama 3 70B)**: Large Language Model for fashion reasoning and natural language feedback.
+*   **OpenCV**: Image processing and K-Means color clustering.
 
-### Backend
-
-* Python
-* FastAPI
-
-### Machine Learning
-
-* YOLOv8 (Object Detection)
-* OpenCV (Image Processing)
-* KMeans Clustering (Color Extraction)
-
-### Database & Storage
-
-* MongoDB Atlas
-* Cloudinary
-
-### Integrations
-
-* Remove.bg API
-* SerpApi (Google Shopping)
+### **Data & Storage**
+*   **MongoDB Atlas**: Scalable NoSQL storage for wardrobe items and outfits.
+*   **Cloudinary**: Automated cloud image hosting and optimization.
 
 ---
 
-## 🔄 How It Works
+## 🧮 The Scoring Engine (100-Point Logic)
 
-### 1. Authentication
+FitFlow uses a professional weighted scoring system to evaluate outfits:
 
-* Secure login using JWT tokens
+1.  **Occasion Fit (50 pts)**: Strict adherence to situational dress codes (e.g., No sneakers for Formal).
+2.  **Style Compatibility (20 pts)**: Matching stylistic "vibes" (e.g., Business vs. Casual).
+3.  **Outfit Combination (15 pts)**: Evaluation of standard garment pairings.
+4.  **Color Harmony (15 pts)**: Complementary and analogous color matching.
 
-### 2. Upload Clothing Item
-
-* Image is uploaded
-* Background removed (Remove.bg)
-* YOLO detects clothing type
-* OpenCV extracts dominant color
-* Image stored in Cloudinary
-* Metadata saved in MongoDB
-
-### 3. Outfit Recommendation
-
-* User selects occasion
-* Backend generates combinations
-* Applies scoring rules
-* Returns best outfit
-
-### 4. Shopping Suggestions
-
-* Missing items detected
-* SerpApi fetches real products
-
----
-
-## 🧮 Scoring Engine (Core Logic)
-
-Outfits are ranked using a weighted scoring system:
-
-```
-Score = 
-  w1 * color_match +
-  w2 * occasion_fit +
-  w3 * style_alignment +
-  w4 * user_preference
-```
-
-### Factors Considered:
-
-* Color harmony (complementary / analogous)
-* Occasion compatibility
-* Style consistency (formal vs casual)
-* Clothing hierarchy
+*Final scores are displayed out of 10 in the UI for a clean, modern user experience (e.g., 8.5/10).*
 
 ---
 
@@ -142,101 +65,51 @@ Score =
 
 ```
 fitflow/
-│
-├── frontend/          # React App
-├── backend/
-│   ├── main.py        # FastAPI entry point
-│   ├── routes/        # API endpoints
-│   ├── models/        # ML models
-│   ├── services/      # Business logic
-│   └── recommender.py # Outfit scoring engine
-│
-├── database/          # MongoDB schemas
-├── utils/             # Image processing helpers
+├── frontend/             # React App (Vite + Vanilla CSS)
+│   ├── src/components/   # Wardrobe, OutfitBuilder, Laundry, etc.
+│   └── src/context/      # Global state (WardrobeContext)
+├── backend/              # FastAPI Application
+│   ├── main.py           # API Entry Point
+│   ├── ml/               # AI Engine (YOLO & Recommender logic)
+│   ├── routes/           # API Endpoints
+│   └── services/         # Image & Cloudinary services
 └── README.md
 ```
 
 ---
 
-## ⚙️ Setup Instructions
+## ⚙️ Setup & Installation
 
-### 1. Clone Repository
-
+### **1. Clone & Install**
 ```bash
 git clone https://github.com/your-username/fitflow.git
 cd fitflow
 ```
 
-### 2. Backend Setup
-
+### **2. Backend Setup**
 ```bash
 cd backend
 pip install -r requirements.txt
+# Create .env with MONGO_URI, CLOUDINARY_URL, GROQ_API_KEY, SERP_API_KEY
 uvicorn main:app --reload
 ```
 
-### 3. Frontend Setup
-
+### **3. Frontend Setup**
 ```bash
 cd frontend
 npm install
+# Set VITE_API_BASE_URL in .env
 npm run dev
 ```
 
 ---
 
-## 🔑 Environment Variables
-
-Create a `.env` file in backend:
-
-```
-MONGO_URI=your_mongodb_uri
-CLOUDINARY_URL=your_cloudinary_url
-REMOVE_BG_API_KEY=your_key
-SERP_API_KEY=your_key
-JWT_SECRET=your_secret
-```
-
----
-
-## 📈 Future Improvements
-
-* 🔍 Personalized recommendations (user preference learning)
-* 🧠 Deep learning-based outfit ranking
-* 🌦️ Weather-based outfit suggestions
-* ⚡ Redis caching for faster recommendations
-* 📱 Mobile app version
-
----
-
-## 🧪 Challenges Faced
-
-* Accurate clothing detection on real-world messy images
-* Extracting consistent colors under different lighting
-* Designing a scalable outfit scoring system
-* Handling asynchronous image processing efficiently
-
----
-
 ## 🤝 Contributing
-
-Contributions are welcome!
-
-1. Fork the repo
-2. Create your feature branch
-3. Commit your changes
-4. Open a pull request
-
----
+Contributions are welcome! If you'd like to improve the scoring logic or add new AI models, please open an issue or submit a pull request.
 
 ## 📄 License
-
 This project is licensed under the MIT License.
 
 ---
 
-## ⭐ Final Note
-
-FitFlow is not just a wardrobe app—it is a **fusion of computer vision, recommendation systems, and modern web engineering** aimed at redefining how users interact with their clothing.
-
----
+*FitFlow — Redefining personal style through the fusion of Computer Vision and Generative AI.*

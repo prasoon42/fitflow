@@ -51,12 +51,14 @@ const slotKeyFromItem = (item) => {
     const g = getBuilderCategoryFromItem(item);
     if (g === 'Upperwear') return 'top';
     if (g === 'Lowerwear') return 'bottom';
+    if (g === 'Shoes') return 'shoes';
     return null;
 };
 
 const SIDEBAR_GROUPS = [
     { key: 'Upperwear', label: 'Top' },
     { key: 'Lowerwear', label: 'Bottom' },
+    { key: 'Shoes', label: 'Footwear' },
 ];
 
 /** Backend expects display_name; wardrobe UI uses name. */
@@ -88,6 +90,7 @@ function OutfitBuilder() {
     const [layers, setLayers] = useState({
         top: null,
         bottom: null,
+        shoes: null,
     });
     const [modelDragOver, setModelDragOver] = useState(false);
 
@@ -225,7 +228,7 @@ function OutfitBuilder() {
     };
 
     const handleSaveOutfit = () => {
-        const items = [layers.top?.item, layers.bottom?.item].filter(Boolean);
+        const items = [layers.top?.item, layers.bottom?.item, layers.shoes?.item].filter(Boolean);
         if (items.length === 0) return;
         saveOutfit({
             name: outfitName || `Outfit ${Date.now().toString(36)}`,
@@ -233,12 +236,12 @@ function OutfitBuilder() {
         });
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
-        setLayers({ top: null, bottom: null });
+        setLayers({ top: null, bottom: null, shoes: null });
         setOutfitName('');
     };
 
     const BUILD_OUTFIT_MS = 14000;
-    const RATE_OUTFIT_MS = 22000;
+    const RATE_OUTFIT_MS = 45000;
 
     const handleGenerateSuggestion = async () => {
         setIsGenerating(true);
@@ -248,6 +251,7 @@ function OutfitBuilder() {
         setRankedOptions([]);
         setActiveComboIndex(0);
         setAiPicks({ top: null, bottom: null, shoes: null, accessory: null });
+        setLayers({ top: null, bottom: null });
         try {
             const profileGender = getProfileGender();
             const res = await fetchWithTimeout(
@@ -270,6 +274,9 @@ function OutfitBuilder() {
                 if (Array.isArray(data.warnings) && data.warnings.length > 0) {
                     setBuildNotice(data.warnings.join(' '));
                 }
+                if (data.message) {
+                    setBuildNotice(data.message);
+                }
                 if (!data.message && data.outfit) {
                     const ranked = Array.isArray(data.ranked_options)
                         ? data.ranked_options
@@ -287,6 +294,12 @@ function OutfitBuilder() {
                     const accessoryMatch = findAccessoryWardrobeMatch(primary.accessory);
 
                     if (topMatch || bottomMatch || shoesMatch) {
+                        await handleRateOutfitFromLayers({
+                            top: topMatch,
+                            bottom: bottomMatch,
+                            shoes: shoesMatch,
+                            accessory: accessoryMatch,
+                        });
                         setAiPicks({
                             top: topMatch,
                             bottom: bottomMatch,
@@ -298,15 +311,12 @@ function OutfitBuilder() {
                             bottom: bottomMatch
                                 ? { image: bottomMatch.image, item: { ...bottomMatch } }
                                 : null,
+                            shoes: shoesMatch ? { image: shoesMatch.image, item: { ...shoesMatch } } : null,
                         });
                         setIsGenerating(false);
-                        await handleRateOutfitFromLayers({
-                            top: topMatch,
-                            bottom: bottomMatch,
-                            shoes: shoesMatch,
-                            accessory: accessoryMatch,
-                        });
                         return;
+                    } else {
+                        setBuildNotice('No items in your wardrobe match the suggested style.');
                     }
                 }
                 setFeedbackError(data.message || 'Could not build outfit for selected occasion.');
@@ -331,6 +341,11 @@ function OutfitBuilder() {
         const topR = pickRandom('Upperwear');
         const bottomR = pickRandom('Lowerwear');
         const shoesR = pickRandom('Shoes');
+        await handleRateOutfitFromLayers({
+            top: topR,
+            bottom: bottomR,
+            shoes: shoesR,
+        });
         setAiPicks({
             top: topR,
             bottom: bottomR,
@@ -340,11 +355,7 @@ function OutfitBuilder() {
         setLayers({
             top: topR ? { image: topR.image, item: { ...topR } } : null,
             bottom: bottomR ? { image: bottomR.image, item: { ...bottomR } } : null,
-        });
-        await handleRateOutfitFromLayers({
-            top: topR,
-            bottom: bottomR,
-            shoes: shoesR,
+            shoes: shoesR ? { image: shoesR.image, item: { ...shoesR } } : null,
         });
         setIsGenerating(false);
     };
@@ -414,6 +425,14 @@ function OutfitBuilder() {
         const shoesMatch = findWardrobeMatch(o.shoes);
         const accessoryMatch = findAccessoryWardrobeMatch(o.accessory);
         if (!topMatch && !bottomMatch && !shoesMatch) return;
+        setAiPicks({ top: null, bottom: null, shoes: null, accessory: null });
+        setLayers({ top: null, bottom: null });
+        await handleRateOutfitFromLayers({
+            top: topMatch,
+            bottom: bottomMatch,
+            shoes: shoesMatch,
+            accessory: accessoryMatch,
+        });
         setAiPicks({
             top: topMatch,
             bottom: bottomMatch,
@@ -423,12 +442,7 @@ function OutfitBuilder() {
         setLayers({
             top: topMatch ? { image: topMatch.image, item: { ...topMatch } } : null,
             bottom: bottomMatch ? { image: bottomMatch.image, item: { ...bottomMatch } } : null,
-        });
-        await handleRateOutfitFromLayers({
-            top: topMatch,
-            bottom: bottomMatch,
-            shoes: shoesMatch,
-            accessory: accessoryMatch,
+            shoes: shoesMatch ? { image: shoesMatch.image, item: { ...shoesMatch } } : null,
         });
     };
 
@@ -440,7 +454,7 @@ function OutfitBuilder() {
 
     const handleRateOutfit = () => handleRateOutfitFromLayers();
 
-    const filledSlots = [layers.top, layers.bottom].filter(Boolean).length;
+    const filledSlots = [layers.top, layers.bottom, layers.shoes].filter(Boolean).length;
 
     const outfitModel = (interactive) => (
         <div
@@ -570,12 +584,10 @@ function OutfitBuilder() {
                             >
                                 <p className="outfit-combo-nav__meta">
                                     Match {activeComboIndex + 1} of {rankedOptions.length}
-                                    {rankedOptions[activeComboIndex]?.preview_rating != null ? (
-                                        <>
-                                            {' · '}
-                                            {Number(rankedOptions[activeComboIndex].preview_rating).toFixed(1)}/10
-                                        </>
-                                    ) : null}
+                                    {isRating && <span style={{ marginLeft: 8, opacity: 0.5, fontSize: '0.8em' }}>rating…</span>}
+                                    {!isRating && feedback?.rating != null && (
+                                        <> · <strong style={{ color: feedback.rating >= 8 ? '#22c55e' : feedback.rating >= 6 ? '#f59e0b' : '#ef4444' }}>{feedback.rating}/10</strong> ✨</>
+                                    )}
                                 </p>
                                 <button
                                     type="button"
@@ -588,13 +600,13 @@ function OutfitBuilder() {
                             </div>
                         )}
 
-                        <div className="ai-suggestion-cards" aria-label="AI outfit picks">
+                        <div className="ai-suggestion-cards" aria-label="Selected outfit pieces">
                             {[
                                 { key: 'top', label: 'Top' },
                                 { key: 'bottom', label: 'Bottom' },
                                 { key: 'shoes', label: 'Footwear' },
                             ].map(({ key, label }) => {
-                                const item = aiPicks[key];
+                                const item = layers[key]?.item || aiPicks[key];
                                 const name = item?.name || item?.display_name;
                                 return (
                                     <article key={key} className="ai-suggestion-card">
@@ -604,12 +616,12 @@ function OutfitBuilder() {
                                                 <img src={item.image} alt="" className="ai-suggestion-card__img" />
                                             ) : (
                                                 <div className="ai-suggestion-card__placeholder">
-                                                    {isGenerating ? '…' : '—'}
+                                                    {isGenerating ? '…' : (buildNotice ? 'No appropriate item' : '—')}
                                                 </div>
                                             )}
                                         </div>
                                         <div className="ai-suggestion-card__name" title={name || ''}>
-                                            {name || (isGenerating ? 'Matching…' : 'Empty')}
+                                            {name || (isGenerating ? 'Searching…' : (buildNotice ? 'No appropriate outfit found' : 'Empty'))}
                                         </div>
                                     </article>
                                 );
@@ -633,11 +645,6 @@ function OutfitBuilder() {
                             {filledSlots === 0
                                 ? 'Run “Suggest outfit” to fill this preview.'
                                 : 'Preview only — open Manual builder to change pieces.'}
-                            {removalEnabled === true && (
-                                <span className="model-canvas__bg-note">
-                                    {bgProcessing ? ' Preparing cutouts…' : ' Cutout mode on (remove.bg).'}
-                                </span>
-                            )}
                         </p>
                         {buildNotice ? (
                             <p className="model-canvas__build-notice" role="status">
@@ -684,16 +691,63 @@ function OutfitBuilder() {
                             {feedbackError && <div className="feedback-card__error">{feedbackError}</div>}
                             {feedback && (
                                 <>
-                                    <div className="feedback-card__rating">Rating: {feedback.rating}/10</div>
+                                    {/* ── Big Score Ring ── */}
+                                    <div className="feedback-score-hero">
+                                        <div className="feedback-score-ring" style={{
+                                            '--score-pct': `${(feedback.rating / 10) * 100}%`,
+                                            '--ring-color': feedback.rating >= 8
+                                                ? '#22c55e'
+                                                : feedback.rating >= 6
+                                                ? '#f59e0b'
+                                                : '#ef4444',
+                                        }}>
+                                            <svg viewBox="0 0 80 80" className="feedback-score-svg">
+                                                <circle cx="40" cy="40" r="34" className="feedback-score-track" />
+                                                <circle cx="40" cy="40" r="34" className="feedback-score-fill"
+                                                    style={{
+                                                        strokeDasharray: `${(feedback.rating / 10) * 213.6} 213.6`,
+                                                        stroke: feedback.rating >= 8 ? '#22c55e' : feedback.rating >= 6 ? '#f59e0b' : '#ef4444',
+                                                    }}
+                                                />
+                                            </svg>
+                                            <div className="feedback-score-center">
+                                                <span className="feedback-score-number">{feedback.rating}</span>
+                                                <span className="feedback-score-denom">/10</span>
+                                            </div>
+                                        </div>
+                                        <div className="feedback-score-meta">
+                                            <div className="feedback-score-label">
+                                                {feedback.rating >= 8 ? 'Great look' : feedback.rating >= 6 ? 'Solid fit' : 'Needs work'}
+                                            </div>
+                                            <span className="feedback-score-occasion">
+                                                {(occasion || 'casual day').replace(/_/g, ' ')}
+                                            </span>
+                                        </div>
+                                    </div>
+
                                     <div className="feedback-card__text">{feedback.feedback}</div>
+
+                                    {feedback.why_it_works && (
+                                        <div className="feedback-card__why">
+                                            <strong>Why This Works</strong>
+                                            <p>{feedback.why_it_works}</p>
+                                        </div>
+                                    )}
+
                                     {feedback.issues?.length > 0 && (
                                         <div className="feedback-card__block">
-                                            <strong>Issues:</strong> {feedback.issues.join(', ')}
+                                            <strong>Issues</strong>
+                                            <ul className="feedback-list feedback-list--issues">
+                                                {feedback.issues.map((issue, i) => <li key={i}>{issue}</li>)}
+                                            </ul>
                                         </div>
                                     )}
                                     {feedback.suggestions?.length > 0 && (
                                         <div className="feedback-card__block">
-                                            <strong>Suggestions:</strong> {feedback.suggestions.join(', ')}
+                                            <strong>Suggestions</strong>
+                                            <ul className="feedback-list feedback-list--suggestions">
+                                                {feedback.suggestions.map((s, i) => <li key={i}>{s}</li>)}
+                                            </ul>
                                         </div>
                                     )}
                                     
@@ -708,11 +762,11 @@ function OutfitBuilder() {
                                                         <div className="shopping-products-grid">
                                                             {group.products.map((p, i) => (
                                                                 <a key={i} href={p.link} target="_blank" rel="noopener noreferrer" className="shopping-product-card" title={p.title}>
-                                                                    <div className="shopping-product-img-wrapper">
+                                                                    <div className={`shopping-product-img-wrapper ${!p.image ? 'shopping-product-img-wrapper--empty' : ''}`}>
                                                                         {p.image ? (
                                                                             <img src={p.image} alt="" className="shopping-product-img" loading="lazy" />
                                                                         ) : (
-                                                                            <div className="shopping-product-placeholder">Image</div>
+                                                                            <div className="shopping-product-placeholder">No Preview</div>
                                                                         )}
                                                                     </div>
                                                                     <div className="shopping-product-details">
@@ -785,7 +839,7 @@ function OutfitBuilder() {
                                     type="button"
                                     className="model-canvas__reset"
                                     onClick={() => {
-                                        setLayers({ top: null, bottom: null });
+                                        setLayers({ top: null, bottom: null, shoes: null });
                                         setAiPicks({
                                             top: null,
                                             bottom: null,
@@ -800,6 +854,24 @@ function OutfitBuilder() {
                             </div>
 
                             {outfitModel(true)}
+
+                            <div className="outfit-builder-cards-manual">
+                                {[
+                                    { key: 'top', label: 'Top' },
+                                    { key: 'bottom', label: 'Bottom' },
+                                    { key: 'shoes', label: 'Footwear' },
+                                ].map(({ key, label }) => {
+                                    const item = layers[key]?.item;
+                                    const name = item?.name || item?.display_name;
+                                    return (
+                                        <div key={key} className="manual-item-status">
+                                            <span className="manual-item-status__dot" style={{ backgroundColor: item ? '#22c55e' : '#64748b' }}></span>
+                                            <span className="manual-item-status__label">{label}:</span>
+                                            <span className="manual-item-status__name">{name || 'Empty'}</span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </section>
                     </div>
 

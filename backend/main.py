@@ -385,7 +385,12 @@ def rate_outfit_api(payload: RateOutfitRequest = Body(...), user_id: str = Depen
     if occasion not in OCCASIONS:
         raise HTTPException(status_code=400, detail=f"Unsupported occasion. Use one of: {', '.join(OCCASIONS)}")
 
-    return rate_outfit(occasion, payload.outfit or {}, gender=payload.gender)
+    # Fetch the user's wardrobe so Groq can suggest items they already own
+    user_wardrobe = list(wardrobe_collection.find({"user_id": user_id}))
+    for item in user_wardrobe:
+        item["_id"] = str(item["_id"])
+
+    return rate_outfit(occasion, payload.outfit or {}, gender=payload.gender, wardrobe=user_wardrobe)
 
 @app.get("/test-shopping")
 @app.get("/test-serp-shopping")  # alias

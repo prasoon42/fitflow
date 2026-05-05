@@ -66,8 +66,8 @@ _SHOPPING_KEYWORD_BASE: List[Tuple[str, str]] = [
     ("watch", "minimalist watch men"),
     ("belt", "leather belt men"),
     ("jeans", "men jeans"),
-    ("skirt", "women skirt"),
-    ("dress", "women dress"),
+    ("skirt", "men chino shorts"),
+    ("dress", "men smart casual outfit"),
     ("vest", "men vest"),
     ("top", "men smart casual shirt"),
     ("sport", "men running shoes"),
@@ -263,12 +263,41 @@ def _dedupe_products(products: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return out
 
 
-def get_products(search_query: str, limit: int = 5) -> List[Dict[str, Any]]:
+def _enforce_gender_in_query(query: str, gender: Optional[str]) -> str:
+    """
+    Ensure the SerpAPI query only returns gender-appropriate results.
+    For male users: strip any 'women/woman/female' tokens, append 'men' if not present.
+    For female users: strip any 'men/man/male' tokens (not 'women'), append 'women' if needed.
+    """
+    g = _norm_gender_shop(gender)
+    q = (query or "").strip()
+    if not q or not g:
+        return q
+
+    if g == "male":
+        # Remove female tokens
+        q = re.sub(r"\b(women|woman|female|ladies|girls?)\b", "", q, flags=re.I).strip()
+        q = re.sub(r"\s{2,}", " ", q).strip()
+        # Add 'men' if no male marker present
+        if not re.search(r"\b(men|man|male|mens|gents)\b", q, re.I):
+            q = q + " men"
+    elif g == "female":
+        # Remove male tokens (but not 'women')
+        q = re.sub(r"\b(?<!wo)(men|man|male|mens|gents)\b", "", q, flags=re.I).strip()
+        q = re.sub(r"\s{2,}", " ", q).strip()
+        if not re.search(r"\b(women|woman|female|ladies)\b", q, re.I):
+            q = q + " women"
+
+    return q.strip()
+
+
+def get_products(search_query: str, limit: int = 5, gender: Optional[str] = None) -> List[Dict[str, Any]]:
     """
     Fetch top products using SerpApi Google Shopping API.
     Gracefully falls back to direct search link on failure or missing API key.
+    Gender is enforced in the query to prevent cross-gender results.
     """
-    q = (search_query or "").strip()
+    q = _enforce_gender_in_query((search_query or "").strip(), gender)
     if not q:
         return []
         
@@ -365,7 +394,7 @@ def _top_up_with_fallback_chain(
     seen = {_product_dedupe_key(p) for p in prods}
     for fq in chain:
         print("[shopping] FALLBACK CHAIN QUERY:", fq)
-        batch = get_products(fq, limit=_MIN_SHOPPING_ITEMS)
+        batch = get_products(fq, limit=_MIN_SHOPPING_ITEMS, gender=gender)
         if not batch:
             continue
         if not label:
@@ -466,6 +495,7 @@ def build_shopping_links(
     limit: int = 5,
     gender: Optional[str] = None,
     preset_queries: Optional[List[str]] = None,
+    is_smart_query: bool = False,
 ) -> List[Dict[str, Any]]:
     grouped: List[Dict[str, Any]] = []
     print("[shopping-debug] ---------- shopping pipeline ----------")
@@ -488,10 +518,13 @@ def build_shopping_links(
             continue
 
         print("[shopping-debug] suggestion raw text:", repr(s))
-        q = clean_query(s, gender=gender)
+        if is_smart_query:
+            q = s
+        else:
+            q = clean_query(s, gender=gender)
         print("[shopping-debug] 2. CLEANED QUERY:", repr(q))
 
-        products = get_products(q, limit=limit)
+        products = get_products(q, limit=limit, gender=gender)
         if products:
             grouped.append({"query": q, "products": products})
             seen_queries.add(q.lower())
@@ -504,7 +537,7 @@ def build_shopping_links(
         if pl in seen_queries:
             continue
         print("[shopping-debug] gap preset query (direct):", repr(pq))
-        products = get_products(pq, limit=limit)
+        products = get_products(pq, limit=limit, gender=gender)
         if products:
             grouped.append({"query": pq, "products": products})
             seen_queries.add(pl)

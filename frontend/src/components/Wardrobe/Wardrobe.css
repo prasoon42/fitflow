@@ -110,6 +110,25 @@
     margin-top: 6px;
 }
 
+.clothing-card__laundry-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.clothing-card__laundry-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #ff9f0a;
+    background: rgba(255, 159, 10, 0.12);
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+}
+
 /* Image upload placeholder */
 .image-upload {
     border: 2px dashed var(--border-color);

@@ -8,8 +8,10 @@ pymongo
 cloudinary
 pyjwt
 passlib[bcrypt]
+bcrypt
 python-dotenv
 requests
 Pillow
+groq
 # Optional legacy path: POST /try-on/replicate
 # replicate

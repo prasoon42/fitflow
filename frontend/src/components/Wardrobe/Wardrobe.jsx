@@ -22,6 +22,11 @@ const LaundryIcon = () => (
         <circle cx="12" cy="13" r="8" /><circle cx="12" cy="13" r="3" /><path d="M5 3h14" />
     </svg>
 );
+const ReturnIcon = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 105.64-11.36L1 10" />
+    </svg>
+);
 const CloseIcon = () => (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
@@ -74,6 +79,7 @@ function Wardrobe() {
         addClothingItem,
         removeClothingItem,
         moveToLaundry,
+        returnFromLaundry,
         busyIds,
         loadingWardrobe,
     } = useWardrobe();
@@ -431,15 +437,28 @@ function Wardrobe() {
                                         {getWardrobeBroadGroup(item.category)}
                                     </span>
                                 </div>
-                                {!removeMode && item.status === 'available' && (
+                                {!removeMode && (
                                     <div className="clothing-card__actions">
-                                        <button
-                                            className="btn btn--sm btn--secondary"
-                                            onClick={(e) => { e.stopPropagation(); moveToLaundry(item.id); }}
-                                            disabled={busyIds.has(item.id)}
-                                        >
-                                            <LaundryIcon /> {busyIds.has(item.id) ? 'Updating...' : 'To Laundry'}
-                                        </button>
+                                        {item.status === 'available' ? (
+                                            <button
+                                                className="btn btn--sm btn--secondary"
+                                                onClick={(e) => { e.stopPropagation(); moveToLaundry(item.id); }}
+                                                disabled={busyIds.has(item.id)}
+                                            >
+                                                <LaundryIcon /> {busyIds.has(item.id) ? 'Updating...' : 'To Laundry'}
+                                            </button>
+                                        ) : (
+                                            <div className="clothing-card__laundry-group">
+                                                <span className="clothing-card__laundry-label">In Laundry</span>
+                                                <button
+                                                    className="btn btn--sm btn--secondary"
+                                                    onClick={(e) => { e.stopPropagation(); returnFromLaundry(item.id); }}
+                                                    disabled={busyIds.has(item.id)}
+                                                >
+                                                    <ReturnIcon /> {busyIds.has(item.id) ? 'Updating...' : 'Return'}
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>

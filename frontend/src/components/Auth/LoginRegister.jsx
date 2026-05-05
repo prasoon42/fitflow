@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import './LoginRegister.css'; // Let's assume you'll create a simple CSS file or reuse existing classes
 
-function LoginRegister() {
+function LoginRegister({ onBackToHome }) {
     const { login, register } = useAuth();
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
@@ -33,6 +33,16 @@ function LoginRegister() {
     return (
         <div className="auth-container">
             <div className="auth-card">
+                {onBackToHome && (
+                    <button 
+                        type="button" 
+                        className="btn--link" 
+                        onClick={onBackToHome}
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginBottom: '1rem', color: 'var(--text-secondary)' }}
+                    >
+                        ← Back to Home
+                    </button>
+                )}
                 <h1 className="auth-title">FitFlow</h1>
                 <p className="auth-subtitle">
                     {isLogin ? 'Log in to your digital closet' : 'Create your digital closet'}

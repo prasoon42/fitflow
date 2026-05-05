@@ -9,8 +9,12 @@ function TopBar() {
     return (
         <header className="topbar">
             <div className="topbar__brand">
-                <img src="/fitflow.png" alt="FitFlow logo" className="topbar__logo" />
-                FitFlow
+                <svg className="topbar__logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '28px', height: '28px', color: 'var(--accent)' }}>
+                    <path d="M16 4H8L4 10V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V10L16 4Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M4 10H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M12 4V10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Fit<span style={{ color: 'var(--accent)' }}>Flow</span>
             </div>
             <div className="topbar__right">
                 <div className="topbar__user">Hi, {user?.name || 'User'}</div>

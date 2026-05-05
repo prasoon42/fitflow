@@ -4,7 +4,7 @@ const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
     const [theme, setTheme] = useState(() => {
-        return localStorage.getItem('fitflow-theme') || 'light';
+        return localStorage.getItem('fitflow-theme') || 'dark';
     });
 
     useEffect(() => {

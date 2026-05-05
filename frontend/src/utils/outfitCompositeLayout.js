@@ -13,7 +13,7 @@ export const OUTFIT_COMPOSITE = {
     /** Top garment slot width as fraction of container inner width. */
     topWidthRatio: 0.62,
     /** bottom_width = top_width * k */
-    bottomWidthOfTop: 0.95,
+    bottomWidthOfTop: 1.0,
     /** Default overlap (px at ref height); clamped to [5, 15] when scaled. */
     overlapRefPx: 10,
     /** If no top image, place bottom waist on this fraction of body height. */

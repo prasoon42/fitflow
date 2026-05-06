@@ -148,12 +148,31 @@ export function AuthProvider({ children }) {
         return true;
     };
 
-    const updateUserAvatar = (avatarDataUrl) => {
+    const updateUserAvatar = async (avatarDataUrl) => {
         const clean = String(avatarDataUrl || '').trim();
         if (!clean || !user?.email) return false;
         if (user?.avatar) return false; // DP can be set only once.
+
+        // 1. Update local storage & state immediately for snappy UI
         localStorage.setItem(avatarStorageKey(user.email), clean);
         setUser(prev => prev ? { ...prev, avatar: clean } : prev);
+
+        // 2. Persist to backend
+        const token = localStorage.getItem('token');
+        if (token) {
+            try {
+                await fetch(`${API_BASE}/profile`, {
+                    method: 'PUT',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ profile_image: clean }),
+                });
+            } catch (error) {
+                console.error("Error saving avatar to backend", error);
+            }
+        }
         return true;
     };
 

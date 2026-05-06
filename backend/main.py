@@ -168,6 +168,7 @@ class UserProfileUpdate(BaseModel):
     preferred_colors: Optional[List[str]] = None
     fit_preference: Optional[str] = None
     description: Optional[str] = None
+    profile_image: Optional[str] = None
 
 
 @app.post("/register")
@@ -208,7 +209,8 @@ def get_profile(user_id: str = Depends(get_current_user)):
         "fashion_styles": db_user.get("fashion_styles", []),
         "preferred_colors": db_user.get("preferred_colors", []),
         "fit_preference": db_user.get("fit_preference", ""),
-        "description": db_user.get("description", "")
+        "description": db_user.get("description", ""),
+        "profile_image": db_user.get("profile_image", "")
     }
 
 @app.put("/profile")

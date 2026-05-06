@@ -757,7 +757,7 @@
 .feedback-card__shopping {
     margin-top: 24px;
     padding-top: 20px;
-    border-top: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+    border-top: 1px solid var(--border-color);
 }
 
 .shopping-title {
@@ -796,8 +796,8 @@
 .shopping-product-card {
     display: flex;
     flex-direction: column;
-    background: var(--surface-elevated, rgba(255, 255, 255, 0.04));
-    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-md, 8px);
     overflow: hidden;
     text-decoration: none;
@@ -891,7 +891,7 @@
     align-items: center;
     gap: 24px;
     padding: 20px 0 22px;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid var(--border-color);
     margin-bottom: 20px;
 }
 
@@ -911,7 +911,7 @@
 
 .feedback-score-track {
     fill: none;
-    stroke: rgba(255,255,255,0.06);
+    stroke: var(--border-color);
     stroke-width: 6;
 }
 
@@ -935,13 +935,13 @@
 .feedback-score-number {
     font-size: 1.7rem;
     font-weight: 900;
-    color: #fff;
+    color: var(--text-primary);
     letter-spacing: -0.04em;
 }
 
 .feedback-score-denom {
     font-size: 0.65rem;
-    color: rgba(255,255,255,0.4);
+    color: var(--text-tertiary);
     margin-top: 2px;
     letter-spacing: 0.02em;
 }
@@ -974,9 +974,9 @@
     align-items: center;
     gap: 4px;
     font-size: 0.72rem;
-    color: rgba(255,255,255,0.45);
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--text-secondary);
+    background: var(--bg-hover);
+    border: 1px solid var(--border-color);
     padding: 3px 10px;
     border-radius: 20px;
     width: fit-content;
@@ -985,11 +985,12 @@
 /* Feedback body text */
 .feedback-card__text {
     font-size: 0.95rem;
-    color: rgba(255, 255, 255, 0.85);
+    color: var(--text-primary);
+    opacity: 0.9;
     line-height: 1.7;
     margin-bottom: 24px;
     padding-left: 16px;
-    border-left: 3px solid rgba(255, 255, 255, 0.1);
+    border-left: 3px solid var(--border-color);
     letter-spacing: 0.01em;
 }
 
@@ -997,8 +998,8 @@
 .feedback-card__why {
     margin: 0 0 24px;
     padding: 16px 20px;
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
     border-radius: 12px;
     backdrop-filter: blur(8px);
 }
@@ -1011,13 +1012,14 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--text-secondary);
     margin-bottom: 12px;
 }
 
 .feedback-card__why p {
     font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.75);
+    color: var(--text-primary);
+    opacity: 0.8;
     margin: 0;
     line-height: 1.6;
 }
@@ -1033,7 +1035,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--text-secondary);
     margin-bottom: 12px;
 }
 
@@ -1049,11 +1051,11 @@
 
 .feedback-list li {
     font-size: 0.88rem;
-    color: rgba(255, 255, 255, 0.85);
+    color: var(--text-primary);
     line-height: 1.5;
     padding: 12px 16px 12px 40px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
     border-radius: 10px;
     position: relative;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

@@ -23,6 +23,8 @@ function Profile() {
     const [dpError, setDpError] = useState('');
     const favoriteColorsSummary = profile.colors.length > 0 ? profile.colors.slice(0, 3).join(', ') : 'Not set';
 
+    const [isEditing, setIsEditing] = useState(false);
+
     useEffect(() => {
         const fetchProfile = async () => {
             const token = localStorage.getItem('token');
@@ -40,6 +42,9 @@ function Profile() {
                 });
                 if (parsed?.display_name && parsed.display_name !== displayName) {
                     updateUserName(parsed.display_name);
+                }
+                if (parsed?.profile_image && !user?.avatar) {
+                    updateUserAvatar(parsed.profile_image);
                 }
             } catch (error) {
                 console.error("Error fetching profile from backend", error);
@@ -61,6 +66,7 @@ function Profile() {
     };
 
     const toggleStyle = (style) => {
+        if (!isEditing) return;
         setProfile(prev => ({
             ...prev,
             styles: prev.styles.includes(style)
@@ -70,6 +76,7 @@ function Profile() {
     };
 
     const toggleColor = (colorName) => {
+        if (!isEditing) return;
         setProfile(prev => ({
             ...prev,
             colors: prev.colors.includes(colorName)
@@ -97,6 +104,7 @@ function Profile() {
             }
             
             setSaved(true);
+            setIsEditing(false);
             setTimeout(() => setSaved(false), 2000);
         } catch (error) {
             console.error("Error saving profile", error);
@@ -104,39 +112,12 @@ function Profile() {
         }
     };
 
-    const handleNameSave = async () => {
-        const ok = updateUserName(editedName);
-        if (!ok) return;
-        const token = localStorage.getItem('token');
-        if (token) {
-            try {
-                await axios.put(`${API_URL}/profile`, { display_name: editedName }, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-            } catch (error) {
-                console.error("Error saving name to backend", error);
-            }
-        }
-        setSaved(true);
-        setTimeout(() => setSaved(false), 2000);
-    };
-
     const handleDpChange = (e) => {
         const file = e.target.files?.[0];
         if (!file) return;
-        if (user?.avatar) {
-            setDpError('DP is already set and cannot be changed.');
-            e.target.value = '';
-            return;
-        }
         const reader = new FileReader();
         reader.onloadend = () => {
-            const ok = updateUserAvatar(reader.result);
-            if (!ok) {
-                setDpError('DP is already set and cannot be changed.');
-                return;
-            }
-            setDpError('');
+            updateUserAvatar(reader.result);
             setSaved(true);
             setTimeout(() => setSaved(false), 2000);
         };
@@ -146,142 +127,90 @@ function Profile() {
 
     return (
         <div className="profile-panel">
-            <div className="panel-header">
-                <h1 className="panel-header__title">{displayName}'s Profile</h1>
-                <p className="panel-header__subtitle">
-                    Personalize your style preferences and fit recommendations
-                </p>
-            </div>
+            <header className="profile-header">
+                <div className="header-content">
+                    <h1 className="header-title">
+                        {displayName}'s <span className="accent-text">Profile</span>
+                    </h1>
+                    <p className="header-subtitle">Personalize your style identity and preferences</p>
+                </div>
+                {!isEditing && (
+                    <button className="btn-edit-ghost" onClick={() => setIsEditing(true)}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        Edit profile
+                    </button>
+                )}
+            </header>
 
-            <div className="profile-layout">
-                {/* Avatar / User Card */}
-                <div className="profile-sidebar">
-                    <div className="card profile-avatar-card">
-                        <div className="profile-avatar">
+            <div className="profile-hero">
+                <div className="hero-main">
+                    <div className="hero-avatar-wrapper">
+                        <div className="hero-avatar">
                             {user?.avatar ? (
-                                <img src={user.avatar} alt={displayName} className="profile-avatar__img" />
+                                <img src={user.avatar} alt={displayName} className="hero-avatar-img" />
                             ) : (
-                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--text-tertiary)' }}>
-                                    <circle cx="12" cy="8" r="4" />
-                                    <path d="M4 20c0-4 4-7 8-7s8 3 8 7" />
-                                </svg>
+                                <span className="avatar-initial">{displayName.charAt(0)}</span>
                             )}
                         </div>
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/*"
-                            onChange={handleDpChange}
-                            style={{ display: 'none' }}
-                        />
-                        {!user?.avatar && (
-                            <button
-                                className="btn btn--secondary btn--sm profile-avatar__btn"
-                                onClick={() => fileInputRef.current?.click()}
-                            >
-                                Set DP
-                            </button>
-                        )}
-                        {dpError && <div className="profile-avatar__error">{dpError}</div>}
-                        <div className="profile-avatar-card__name">{displayName}</div>
-                        <div className="profile-avatar-card__sub">{user?.email || 'Setup your style identity'}</div>
-                        <div className="profile-about">
-                            <div className="profile-about__row">
-                                <span className="profile-about__label">Gender</span>
-                                <span className="profile-about__value">{profile.gender || 'Not set'}</span>
-                            </div>
-                            <div className="profile-about__row">
-                                <span className="profile-about__label">Age</span>
-                                <span className="profile-about__value">{profile.age || 'Not set'}</span>
-                            </div>
-                            <div className="profile-about__row">
-                                <span className="profile-about__label">Fav Colors</span>
-                                <span className="profile-about__value">{favoriteColorsSummary}</span>
-                            </div>
-                            <div className="profile-about__row">
-                                <span className="profile-about__label">Outfits</span>
-                                <span className="profile-about__value">{wardrobeItems.length}</span>
-                            </div>
-                        </div>
-                        <div className="profile-avatar-card__stats">
-                            <div className="profile-stat">
-                                <span className="profile-stat__value">{profile.styles.length}</span>
-                                <span className="profile-stat__label">Styles</span>
-                            </div>
-                            <div className="profile-stat">
-                                <span className="profile-stat__value">{profile.colors.length}</span>
-                                <span className="profile-stat__label">Colors</span>
-                            </div>
-                        </div>
                     </div>
-
-                    <div className="card profile-tips-card">
-                        <div className="profile-tips-card__title">Style Tips</div>
-                        <ul className="profile-tips-card__list">
-                            <li>Select 3-5 styles for best outfit recommendations</li>
-                            <li>Pick colors you reach for most often</li>
-                            <li>Update your profile as your taste evolves</li>
-                        </ul>
+                    <div className="hero-info">
+                        <h2 className="hero-name">{displayName}</h2>
+                        <p className="hero-email">{user?.email}</p>
                     </div>
                 </div>
 
-                {/* Main form */}
-                <div className="profile-main">
-                    <div className="card profile-card">
+                <div className="stats-row">
+                    <div className="stat-card">
+                        <span className="stat-value stat-value--accent">{profile.styles.length}</span>
+                        <span className="stat-label">STYLES</span>
+                    </div>
+                    <div className="stat-card">
+                        <span className="stat-value stat-value--accent">{profile.colors.length}</span>
+                        <span className="stat-label">COLORS</span>
+                    </div>
+                    <div className="stat-card">
+                        <span className="stat-value">{profile.age || '--'}</span>
+                        <span className="stat-label">AGE</span>
+                    </div>
+                </div>
+            </div>
+
+            <div className="profile-content-card">
+                {isEditing ? (
+                    <div className="edit-form-container">
                         <div className="profile-form">
                             <div className="profile-form__row">
                                 <div className="profile-form__group profile-form__group--full">
-                                    <label className="label" htmlFor="name-input">Username</label>
-                                    <div className="profile-name-row">
-                                        <input
-                                            id="name-input"
-                                            className="input"
-                                            placeholder="Enter your name"
-                                            value={editedName}
-                                            onChange={(e) => setEditedName(e.target.value)}
-                                        />
-                                        <button
-                                            className="btn btn--secondary"
-                                            onClick={handleNameSave}
-                                            disabled={!editedName.trim()}
-                                        >
-                                            Save Name
-                                        </button>
-                                    </div>
+                                    <label className="label">Username</label>
+                                    <input
+                                        className="input"
+                                        placeholder="Enter your name"
+                                        value={editedName}
+                                        onChange={(e) => setEditedName(e.target.value)}
+                                    />
                                 </div>
                             </div>
-
                             <div className="profile-form__row">
                                 <div className="profile-form__group">
-                                    <label className="label" htmlFor="gender-select">Gender</label>
-                                    <select
-                                        id="gender-select"
-                                        className="select"
-                                        value={profile.gender}
-                                        onChange={handleGenderChange}
-                                    >
+                                    <label className="label">Gender</label>
+                                    <select className="select" value={profile.gender} onChange={handleGenderChange}>
                                         <option value="">Select gender</option>
                                         <option value="male">Male</option>
                                         <option value="female">Female</option>
                                         <option value="other">Other</option>
                                     </select>
                                 </div>
-
                                 <div className="profile-form__group">
-                                    <label className="label" htmlFor="age-input">Age</label>
+                                    <label className="label">Age</label>
                                     <input
-                                        id="age-input"
                                         type="number"
                                         className="input"
                                         placeholder="Enter age"
                                         value={profile.age}
                                         onChange={handleAgeChange}
-                                        min="10"
-                                        max="100"
                                     />
                                 </div>
                             </div>
-
                             <div className="profile-form__group">
                                 <label className="label">Style Preferences</label>
                                 <div className="chips">
@@ -296,7 +225,6 @@ function Profile() {
                                     ))}
                                 </div>
                             </div>
-
                             <div className="profile-form__group">
                                 <label className="label">Favorite Colors</label>
                                 <div className="color-swatches">
@@ -307,24 +235,84 @@ function Profile() {
                                             style={{ backgroundColor: color.hex }}
                                             onClick={() => toggleColor(color.name)}
                                             title={color.name}
-                                            aria-label={`Select ${color.name}`}
                                         />
                                     ))}
                                 </div>
                             </div>
-
                             <div className="profile-form__actions">
-                                <button className="btn btn--primary" onClick={handleSave} id="save-profile-btn">
-                                    Save Profile
-                                </button>
+                                <button className="btn btn--secondary" onClick={() => setIsEditing(false)}>Cancel</button>
+                                <button className="btn btn--primary" onClick={handleSave}>Save Changes</button>
                             </div>
                         </div>
                     </div>
-                </div>
+                ) : (
+                    <div className="view-container">
+                        <section className="profile-section">
+                            <h3 className="section-title">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="section-icon"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                                IDENTITY
+                            </h3>
+                            <div className="info-grid">
+                                <div className="info-item">
+                                    <span className="info-label">USERNAME</span>
+                                    <span className="info-value">{displayName}</span>
+                                </div>
+                                <div className="info-item">
+                                    <span className="info-label">GENDER</span>
+                                    <span className="info-value capitalize">{profile.gender || 'Not specified'}</span>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section className="profile-section">
+                            <h3 className="section-title">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="section-icon"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
+                                STYLE PREFERENCES
+                            </h3>
+                            <div className="chips-row">
+                                {profile.styles.map(style => (
+                                    <div key={style} className="info-chip">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.62 1.97V21a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V5.43a2 2 0 0 0-1.62-1.97z"></path><path d="M12 22V12"></path></svg>
+                                        {style}
+                                    </div>
+                                ))}
+                                {profile.styles.length === 0 && <span className="empty-text">No styles selected</span>}
+                            </div>
+                        </section>
+
+                        <section className="profile-section">
+                            <h3 className="section-title">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="section-icon"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
+                                FAVOURITE COLORS
+                            </h3>
+                            <div className="chips-row">
+                                {profile.colors.map(colorName => {
+                                    const colorObj = colorOptions.find(c => c.name === colorName);
+                                    return (
+                                        <div key={colorName} className="info-chip">
+                                            <span className="color-dot" style={{ backgroundColor: colorObj?.hex || '#ccc' }}></span>
+                                            {colorName}
+                                        </div>
+                                    );
+                                })}
+                                {profile.colors.length === 0 && <span className="empty-text">No colors selected</span>}
+                            </div>
+                        </section>
+                    </div>
+                )}
             </div>
 
+            <footer className="profile-footer">
+                <p className="last-updated">Last updated · {new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' })}</p>
+                <div className="footer-action">
+                    <button className="btn-down-arrow">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 13l5 5 5-5M7 6l5 5 5-5"></path></svg>
+                    </button>
+                </div>
+            </footer>
+
             {saved && (
-                <div className="save-toast">✓ Profile saved successfully</div>
+                <div className="save-toast">✓ Profile updated successfully</div>
             )}
         </div>
     );

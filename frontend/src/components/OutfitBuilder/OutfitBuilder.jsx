@@ -58,7 +58,6 @@ const slotKeyFromItem = (item) => {
 const SIDEBAR_GROUPS = [
     { key: 'Upperwear', label: 'Top' },
     { key: 'Lowerwear', label: 'Bottom' },
-    { key: 'Shoes', label: 'Footwear' },
 ];
 
 /** Backend expects display_name; wardrobe UI uses name. */
@@ -277,7 +276,7 @@ function OutfitBuilder() {
                 if (data.message) {
                     setBuildNotice(data.message);
                 }
-                if (!data.message && data.outfit) {
+                if (data.outfit) {
                     const ranked = Array.isArray(data.ranked_options)
                         ? data.ranked_options
                         : [];
@@ -859,7 +858,6 @@ function OutfitBuilder() {
                                 {[
                                     { key: 'top', label: 'Top' },
                                     { key: 'bottom', label: 'Bottom' },
-                                    { key: 'shoes', label: 'Footwear' },
                                 ].map(({ key, label }) => {
                                     const item = layers[key]?.item;
                                     const name = item?.name || item?.display_name;

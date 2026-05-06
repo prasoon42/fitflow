@@ -148,10 +148,10 @@ HARD_CONSTRAINTS: Dict[str, Set[str]] = {
 # ── Forbidden YOLO classes per occasion (for wardrobe filtering) ────
 FORBIDDEN_ANY_YOLO: Dict[str, Set[str]] = {
     "formal_event": {"t-shirt", "hoodie", "shorts", "sneaker", "sport", "slide", "casual", "sweatshirt"},
-    "office":       {"shorts", "slide"},
-    "party":        set(),
-    "date_night":   set(),
-    "casual_day":   set(),
+    "office":       {"shorts", "slide", "hoodie", "t-shirt", "sneaker", "sweatshirt"},
+    "party":        {"slide", "shorts"},
+    "date_night":   {"hoodie", "shorts", "slide", "sweatshirt"},
+    "casual_day":   {"heel"},
     "gym":          {"jeans", "boot", "heel", "blazer", "formal_shirt"},
     "travel":       {"heel"},
 }
@@ -401,39 +401,39 @@ def filter_wardrobe_for_occasion(
 # Occasion → {slot: set of ideal classes}
 IDEAL_CLASSES: Dict[str, Dict[str, Set[str]]] = {
     "formal_event": {
-        "top": {"blazer", "formal_shirt"},
-        "bottom": {"trousers"},
+        "top": {"blazer", "formal_shirt", "vest"},
+        "bottom": {"trousers", "skirt", "dress"},
         "shoes": {"boot", "heel"},
     },
     "office": {
-        "top": {"formal_shirt", "longsleeve", "blazer"},
-        "bottom": {"trousers"},
+        "top": {"formal_shirt", "longsleeve", "blazer", "cardigan", "vest"},
+        "bottom": {"trousers", "skirt"},
         "shoes": {"boot", "heel"},
     },
     "casual_day": {
-        "top": {"t-shirt", "hoodie", "sweatshirt", "casual"},
-        "bottom": {"jeans", "shorts", "trousers"},
-        "shoes": {"sneaker", "sport", "slide"},
+        "top": {"t-shirt", "hoodie", "sweatshirt", "pullover", "sweaters", "cardigan", "top", "longsleeve"},
+        "bottom": {"jeans", "shorts"},
+        "shoes": {"sneaker", "slide"},
     },
     "party": {
         "top": {"blazer", "formal_shirt", "dress", "vest", "longsleeve", "t-shirt", "cardigan"},
-        "bottom": {"jeans", "trousers"},
-        "shoes": {"boot", "sneaker", "heel", "sport"},
+        "bottom": {"jeans", "trousers", "skirt"},
+        "shoes": {"boot", "sneaker", "heel"},
     },
     "date_night": {
-        "top": {"blazer", "formal_shirt", "longsleeve", "cardigan", "sweaters", "vest", "pullover", "dress"},
+        "top": {"blazer", "formal_shirt", "longsleeve", "cardigan", "sweaters", "vest", "pullover", "dress", "t-shirt"},
         "bottom": {"jeans", "trousers", "skirt"},
-        "shoes": {"boot", "heel"},
+        "shoes": {"boot", "heel", "sneaker"},
     },
     "gym": {
-        "top": {"t-shirt", "sport"},
-        "bottom": {"shorts", "trousers"},
-        "shoes": {"sneaker", "sport"},
+        "top": {"t-shirt", "sport", "sweatshirt", "hoodie"},
+        "bottom": {"shorts"},
+        "shoes": {"sneaker"},
     },
     "travel": {
-        "top": {"t-shirt", "hoodie", "sweatshirt"},
-        "bottom": {"jeans", "trousers"},
-        "shoes": {"sneaker", "sport"},
+        "top": {"t-shirt", "hoodie", "sweatshirt", "cardigan", "pullover"},
+        "bottom": {"jeans", "shorts"},
+        "shoes": {"sneaker", "slide"},
     },
 }
 

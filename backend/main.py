@@ -359,12 +359,16 @@ def add_detected_item(payload: DetectedItemChoice = Body(...), user_id: str = De
 
 @app.get("/recommend")
 def recommend(occasion: str, user_id: str = Depends(get_current_user)):
+    # Fetch user's profile for gender
+    db_user = users_collection.find_one({"_id": ObjectId(user_id)})
+    gender = db_user.get("gender") if db_user else None
+
     # Fetch user's wardrobe from Mongo
     user_wardrobe = list(wardrobe_collection.find({"user_id": user_id}))
     for item in user_wardrobe:
         item["_id"] = str(item["_id"])
         
-    return recommend_outfit(user_wardrobe, occasion)
+    return recommend_outfit(user_wardrobe, occasion, gender=gender)
 
 @app.post("/build-outfit")
 def build_outfit_api(payload: BuildOutfitRequest = Body(...), user_id: str = Depends(get_current_user)):

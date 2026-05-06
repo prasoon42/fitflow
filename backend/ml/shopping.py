@@ -422,14 +422,53 @@ def outfit_slot_missing(slot: Any) -> bool:
     return not (cat or name)
 
 
+# ── Occasion-wise gap rules (Strict) ────────────────────────────────
+OCCASION_GAP_RULES: Dict[str, Dict[str, List[str]]] = {
+    "office": {
+        "top": ["formal shirt white", "navy blazer professional"],
+        "bottom": ["black trousers professional", "grey skirt professional"],
+        "shoes": ["black leather boots", "formal black heels"],
+    },
+    "formal_event": {
+        "top": ["formal blazer black", "white dress shirt tuxedo style"],
+        "bottom": ["black formal trousers", "elegant formal skirt", "black evening dress"],
+        "shoes": ["black heels elegant", "black leather oxford boots"],
+    },
+    "casual_day": {
+        "top": ["casual t-shirt cotton", "plain grey hoodie", "comfy sweatshirt"],
+        "bottom": ["blue denim jeans", "relaxed fit shorts"],
+        "shoes": ["white casual sneakers", "leather slides"],
+    },
+    "party": {
+        "top": ["black slim fit blazer", "stylish party shirt", "statement jacket"],
+        "bottom": ["black slim jeans", "stylish trousers", "leather skirt"],
+        "shoes": ["white stylish sneakers", "black leather boots", "heels"],
+    },
+    "date_night": {
+        "top": ["navy cardigan", "slim fit blazer", "fitted longsleeve"],
+        "bottom": ["fitted black jeans", "stylish skirt", "dark trousers"],
+        "shoes": ["black leather boots", "heels", "stylish sneakers"],
+    },
+    "gym": {
+        "top": ["dry fit sports t-shirt", "running hoodie", "gym sweatshirt"],
+        "bottom": ["black gym shorts", "running joggers"],
+        "shoes": ["white running sneakers", "training sneakers"],
+    },
+    "travel": {
+        "top": ["oversized hoodie", "soft sweatshirt", "comfy t-shirt", "knit cardigan"],
+        "bottom": ["jogger style jeans", "stretch chinos", "comfy travel shorts"],
+        "shoes": ["comfortable walking sneakers", "travel slides"],
+    },
+}
+
 def preset_queries_for_outfit_gaps(
     occasion: str,
     outfit: Optional[Dict[str, Any]],
     gender: Optional[str] = None,
 ) -> List[str]:
     """
-    Ready-to-use Google Shopping queries for missing top / bottom / shoes.
-    Complements text suggestions so users always get product ideas for empty slots.
+    Generate strict, occasion-appropriate shopping queries for missing wardrobe pieces.
+    Follows neutral color preferences (black, white, navy, gray, beige).
     """
     outfit = outfit or {}
     occ = (occasion or "casual_day").lower()
@@ -437,47 +476,20 @@ def preset_queries_for_outfit_gaps(
     top, bottom, shoes = outfit.get("top"), outfit.get("bottom"), outfit.get("shoes")
     q: List[str] = []
 
+    gap_rules = OCCASION_GAP_RULES.get(occ, OCCASION_GAP_RULES["casual_day"])
+
+    def _get_q(slot: str) -> List[str]:
+        raw = gap_rules.get(slot, [])
+        return [f"{r} {'women' if female else 'men'}" for r in raw]
+
     if outfit_slot_missing(top):
-        if occ in ("formal_event", "office"):
-            q.append("women white formal blouse" if female else "mens white dress shirt slim fit")
-        elif occ == "gym":
-            q.append("women sports bra tank gym" if female else "mens dry fit gym t-shirt")
-        elif occ == "party":
-            q.append("women party crop top" if female else "mens black party shirt slim")
-        elif occ == "date_night":
-            q.append("women satin blouse date" if female else "mens date night button shirt")
-        elif occ == "travel":
-            q.append("women airport hoodie soft" if female else "mens travel hoodie grey")
-        else:
-            q.append("women everyday t-shirt cotton" if female else "mens crew neck t-shirt black")
+        q.extend(_get_q("top"))
 
     if outfit_slot_missing(bottom):
-        if occ in ("formal_event", "office"):
-            q.append("women black dress pants" if female else "mens wool dress trousers navy")
-        elif occ == "gym":
-            q.append("women high waist gym shorts" if female else "mens 7 inch gym shorts")
-        elif occ in ("date_night", "party"):
-            q.append("women high rise skinny jeans black" if female else "mens slim black jeans")
-        elif occ == "travel":
-            q.append("women stretch joggers travel" if female else "mens travel chinos stretch")
-        else:
-            q.append("women mid rise blue jeans" if female else "mens slim fit jeans blue")
+        q.extend(_get_q("bottom"))
 
     if outfit_slot_missing(shoes):
-        if occ in ("formal_event", "office"):
-            q.append("women nude block heels office" if female else "mens brown leather oxford shoes")
-        elif occ == "date_night":
-            q.append("women strappy heels black" if female else "mens chelsea boots leather black")
-        elif occ == "gym":
-            q.append("women training running shoes" if female else "mens running shoes training")
-        elif occ == "travel":
-            q.append("women white walking sneakers" if female else "mens white sneakers comfort walking")
-        elif occ == "party":
-            q.append("women heeled ankle boots" if female else "mens black leather boots smart")
-        elif occ == "casual_day":
-            q.append("women white canvas sneakers" if female else "mens lifestyle sneakers white")
-        else:
-            q.append("women casual sneakers leather" if female else "mens casual leather sneakers")
+        q.extend(_get_q("shoes"))
 
     # Dedupe while keeping order
     seen: Set[str] = set()

@@ -60,7 +60,7 @@ def _parse_bullets(text: str, header: str) -> List[str]:
             stripped = line.strip().lstrip("-•* ").strip()
             if stripped and not stripped.endswith(":"):
                 # Stop at next section header
-                if any(h in line for h in ["Rating:", "Feedback:", "Issues:", "Suggestions:", "Why ", "Explain"]):
+                if any(h in line for h in ["Rating:", "Feedback:", "Issues:", "Suggestions:", "Why ", "Explain", "missingItems:"]):
                     break
                 results.append(stripped)
             elif not stripped:
@@ -116,93 +116,69 @@ def _generate_groq_feedback(
     color_pts = rule_score_breakdown.get("color_pts", 0)
     compat_pts = rule_score_breakdown.get("compat_pts", 0)
 
-    system_prompt = """You are a strict fashion scoring engine.
+    system_prompt = """You are the outfit selection and scoring engine for FitFlow.
 
-Your job is to evaluate outfits based on predefined fashion rules.
-You must return a structured score out of 100.
+Your task is to evaluate and generate STRICT occasion-based outfit recommendations.
 
-----------------------------------------
-SCORING BREAKDOWN:
+IMPORTANT:
+You MUST NEVER randomly assign clothing items just to fill placeholders.
+If an appropriate item for a required category is not available, return:
+"No appropriate clothing found"
+instead of forcing mismatched clothing.
 
-1. Occasion Fit (0–50)
-- Perfect match with occasion → 45–50
-- Acceptable → 30–44
-- Weak → 10–29
-- Completely inappropriate → 0–9
+--------------------------------------------------
+STRICT OUTFIT RULES
+--------------------------------------------------
+- Outfit must contain: 1 top, 1 bottom, 1 footwear.
+- EXCEPTION: A 'dress' acts as both top and bottom.
+- NEVER randomly substitute incompatible items.
 
-2. Style Compatibility (0–20)
-- Items match well stylistically → 15–20
-- Neutral → 8–14
-- Clashing styles → 0–7
+--------------------------------------------------
+OCCASION RULES
+--------------------------------------------------
 
-3. Outfit Combination (0–15)
-- Good pairings (e.g., t-shirt + jeans) → 10–15
-- Average → 5–9
-- Bad combinations → 0–4
+1. OFFICE
+ALLOWED: Top (formal_shirt, blazer, cardigan, longsleeve, vest), Bottom (trousers, skirt), Footwear (boot, heel).
+STRICTLY DISALLOW: hoodie, t-shirt, shorts, slide, sneaker, sweatshirt.
 
-4. Color Harmony (0–15)
-- Complementary / neutral → 10–15
-- Okay → 5–9
-- Clashing → 0–4
+2. FORMAL EVENT
+ALLOWED: Top (blazer, formal_shirt, vest), Bottom (trousers, skirt, dress), Footwear (heel, boot).
+STRICTLY DISALLOW: sneaker, slide, hoodie, shorts, t-shirt.
 
-----------------------------------------
-OCCASION RULES:
+3. CASUAL DAY
+ALLOWED: Top (t-shirt, hoodie, sweatshirt, pullover, sweaters, cardigan, top, longsleeve), Bottom (jeans, shorts), Footwear (sneaker, slide).
+DISALLOW: heel, formal-only combinations.
 
-FORMAL EVENT:
-- Allowed: blazer, formal_shirt, trousers, skirt, heel, boot
-- Penalize: t-shirt, hoodie, shorts, sneaker, slide
-- Strict scoring
+4. PARTY
+ALLOWED: Top (blazer, t-shirt, formal_shirt, cardigan, longsleeve), Bottom (jeans, trousers, skirt), Footwear (sneaker, boot, heel).
+DISALLOW: slide, shorts, gym wear.
 
-OFFICE:
-- Allowed: formal_shirt, blazer, cardigan, trousers
-- Neutral: jeans, plain t-shirt
-- Penalize: hoodie, shorts, slides
+5. DATE NIGHT
+ALLOWED: Top (blazer, cardigan, longsleeve, formal_shirt, t-shirt), Bottom (jeans, trousers, skirt), Footwear (boot, heel, sneaker).
+DISALLOW: hoodie, shorts, slide, sweatshirt.
 
-CASUAL:
-- Most items allowed
-- Slight penalty for overly formal outfits
+6. GYM
+ALLOWED: Top (sport, sweatshirt, hoodie, t-shirt), Bottom (shorts), Footwear (sneaker).
+STRICT: If sneaker missing, return "No appropriate clothing found".
+DISALLOW: heel, boot, blazer, formal_shirt.
 
-PARTY:
-- Stylish outfits preferred
-- Penalize overly basic outfits
+7. TRAVEL
+ALLOWED: Top (hoodie, sweatshirt, t-shirt, cardigan, pullover), Bottom (jeans, shorts), Footwear (sneaker, slide).
+DISALLOW: heel, formal combinations.
 
-DATE NIGHT:
-- Smart casual / semi-formal preferred
-- Penalize sloppy or too casual items
+--------------------------------------------------
+GAP DETECTION & SHOPPING RECOMMENDATION RULES
+--------------------------------------------------
+After generating an outfit, analyze if essential pieces are missing for the selected occasion.
+1. If an item is unavailable, mark that slot as "No appropriate clothing found".
+2. Generate a "missingItems" array containing ONLY occasion-appropriate gaps (e.g., "formal black shoes", "white formal shirt").
+3. NEVER recommend random products. Recommendations must match the occasion style and complement neutral colors (black, white, navy, gray, beige).
+4. Recommend maximum 5 items. If complete, return "missingItems": [].
 
-GYM:
-- Only sport, shorts, t-shirt, sneakers
-- Heavy penalty for formal wear
-
-TRAVEL:
-- Comfort prioritized
-- Penalize uncomfortable footwear (heels)
-
-----------------------------------------
-COMBINATION RULES:
-
-Good combinations:
-- blazer + formal_shirt → high score
-- t-shirt + jeans → good
-- hoodie + sneakers → good
-
-Bad combinations:
-- blazer + shorts → strong penalty
-- formal_shirt + slides → penalty
-- hoodie + heels → penalty
-
-----------------------------------------
-HARD RULES:
-
-- If outfit is completely inappropriate → score must be below 20
-- If perfect match → score must be above 85
-- Never give random scores — justify logically
-
-----------------------------------------
+--------------------------------------------------
 OUTPUT FORMAT (STRICT):
-
+--------------------------------------------------
 Rating: X/100
-
 Breakdown:
 - Occasion Fit: X/50
 - Style: X/20
@@ -210,7 +186,10 @@ Breakdown:
 - Color: X/15
 
 Feedback:
-(2–3 lines max)
+(2–3 lines max. DO NOT use emojis. If items are missing, state "No appropriate clothing found" for that slot.)
+
+missingItems:
+- bullet points (e.g., "formal black shoes")
 
 Issues:
 - bullet points
@@ -218,14 +197,11 @@ Issues:
 Suggestions:
 - bullet points
 
-----------------------------------------
 RULES:
-
-- Be concise
-- Be consistent
-- Do not hallucinate items
-- Always follow scoring logic strictly
-- DO NOT use any emojis in your response
+- Be concise and consistent.
+- Do not hallucinate items.
+- Always follow scoring logic strictly.
+- DO NOT use any emojis in your response.
 """
 
     user_prompt = f"""
@@ -280,6 +256,7 @@ Occasion: {occasion.replace('_', ' ')}
         "feedback": feedback_text.strip() or raw,
         "ai_issues": _parse_bullets(raw, "Issues:"),
         "ai_suggestions": _parse_bullets(raw, "Suggestions:"),
+        "ai_missing": _parse_bullets(raw, "missingItems:"),
         "ai_rating": ai_rating,
     }
 
@@ -1138,6 +1115,8 @@ def rate_outfit(
             issues = ai_result["ai_issues"]
         if ai_result.get("ai_suggestions"):
             suggestions = ai_result["ai_suggestions"]
+        if ai_result.get("ai_missing"):
+            suggestions.extend(ai_result["ai_missing"])
         print(f"✅ Groq rating used: {rating}/10 (rule-based was: {rule_score}/10)")
     elif ai_result and ai_result.get("feedback"):
         # Groq gave feedback but no parseable rating — use rule-based rating
@@ -1146,6 +1125,8 @@ def rate_outfit(
             issues = ai_result["ai_issues"]
         if ai_result.get("ai_suggestions"):
             suggestions = ai_result["ai_suggestions"]
+        if ai_result.get("ai_missing"):
+            suggestions.extend(ai_result["ai_missing"])
         print(f"⚠️  Groq gave feedback but no rating — using rule-based: {rule_score}/10")
     else:
         # Full rule-based fallback
@@ -1223,21 +1204,38 @@ def rate_outfit(
     }
 
 
-def recommend_outfit(wardrobe: List[Dict[str, Any]], occasion: str) -> Dict[str, Any]:
-    result = build_outfit(occasion, wardrobe)
-    if "outfit" not in result:
-        return result
-    outfit = result["outfit"]
+def recommend_outfit(wardrobe: List[Dict[str, Any]], occasion: str, gender: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Build an outfit and immediately pass it through the AI rating/feedback engine.
+    This ensures that even if an outfit is partial, the user gets feedback and shopping links.
+    """
+    # 1. Build the outfit (could be partial or closest match)
+    build_res = build_outfit(occasion, wardrobe, gender=gender)
+    outfit = build_res.get("outfit", {})
+    
+    # 2. Rate the resulting outfit to get AI feedback, suggestions, and shopping products
+    rating_res = rate_outfit(
+        occasion, 
+        outfit, 
+        gender=gender, 
+        wardrobe=wardrobe
+    )
+    
+    # 3. Combine build metadata with rating results
+    # Ensure warnings from build_outfit are preserved
+    warnings = build_res.get("warnings") or []
+    if build_res.get("message") and build_res["message"] not in warnings:
+        warnings.append(build_res["message"])
+
     return {
-        "top": outfit.get("top"),
-        "bottom": outfit.get("bottom"),
-        "shoes": outfit.get("shoes"),
+        **rating_res,
+        "outfit": outfit,
         "meta": {
-            "occasion": result.get("occasion"),
-            "scores": result.get("scores", {}),
-            "match_quality": result.get("match_quality"),
-            "warnings": result.get("warnings"),
-            "preview_rating": result.get("preview_rating"),
-            "ranked_options": result.get("ranked_options"),
+            "occasion": build_res.get("occasion"),
+            "scores": build_res.get("scores", {}),
+            "match_quality": build_res.get("match_quality"),
+            "warnings": warnings,
+            "preview_rating": build_res.get("preview_rating"),
+            "ranked_options": build_res.get("ranked_options"),
         },
     }
